@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>漫剧工场 REELMANGA · 一键生成爆款漫剧</title>
+<style>
+/* ============ 基础 ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a12;
+  --bg-2:#0e0e1a;
+  --bg-3:#12121f;
+  --card:rgba(255,255,255,.035);
+  --card-2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.09);
+  --border-2:rgba(255,255,255,.16);
+  --text:#f5f5fa;
+  --muted:#9b9bb3;
+  --dim:#6c6c85;
+  --violet:#8b5cf6;
+  --fuchsia:#d946ef;
+  --pink:#ec4899;
+  --rose:#fb7185;
+  --orange:#fb923c;
+  --amber:#fbbf24;
+  --cyan:#22d3ee;
+  --teal:#2dd4bf;
+  --green:#4ade80;
+  --grad:linear-gradient(120deg,#8b5cf6 0%,#d946ef 45%,#fb7185 100%);
+  --grad-2:linear-gradient(120deg,#22d3ee,#8b5cf6 60%,#d946ef);
+  --shadow:0 20px 60px -20px rgba(0,0,0,.7);
+  --radius:18px;
+  --font:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-en:"Sora","Barlow","Avenir Next",var(--font);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+img{max-width:100%;display:block}
+::selection{background:rgba(217,70,239,.35)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#d946ef);border-radius:99px}
+
+/* ============ 背景氛围 ============ */
+.bg-fx{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.bg-fx::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(1100px 700px at 80% -10%,rgba(139,92,246,.22),transparent 60%),
+    radial-gradient(900px 600px at -10% 20%,rgba(34,211,238,.14),transparent 60%),
+    radial-gradient(800px 700px at 50% 120%,rgba(217,70,239,.18),transparent 60%);
+}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 18s ease-in-out infinite alternate}
+.orb.o1{width:420px;height:420px;background:radial-gradient(circle,#8b5cf6,transparent 70%);top:-120px;left:8%}
+.orb.o2{width:360px;height:360px;background:radial-gradient(circle,#d946ef,transparent 70%);top:30%;right:-100px;animation-delay:-6s}
+.orb.o3{width:340px;height:340px;background:radial-gradient(circle,#22d3ee,transparent 70%);bottom:-120px;left:30%;animation-delay:-12s}
+@keyframes drift{
+  from{transform:translate(0,0) scale(1)}
+  to{transform:translate(60px,-40px) scale(1.15)}
+}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 40%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 40%,transparent 100%);
+}
+
+/* ============ 布局 ============ */
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+.view{display:none;padding-top:86px;min-height:100vh}
+.view.active{display:block;animation:viewIn .5s ease}
+@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ============ 导航 ============ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(10,10,18,.6);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 28px;height:70px;display:flex;align-items:center;gap:28px}
+.logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;letter-spacing:.5px}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;
+  box-shadow:0 8px 24px -8px rgba(217,70,239,.8);position:relative;overflow:hidden}
+.logo-mark::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-100%);animation:sheen 3.5s ease infinite}
+@keyframes sheen{60%,100%{transform:translateX(100%)}}
+.logo-mark svg{width:16px;height:16px;fill:#fff;margin-left:1px}
+.logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo span{font-family:var(--font-en);font-size:10px;letter-spacing:3px;color:var(--muted);font-weight:700}
+.nav-links{display:flex;gap:4px;margin-left:8px}
+.nav-links button{padding:8px 15px;border-radius:10px;color:var(--muted);font-weight:600;font-size:14.5px;transition:.25s}
+.nav-links button:hover{color:var(--text);background:var(--card)}
+.nav-links button.active{color:var(--text);background:rgba(255,255,255,.08)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;border-radius:12px;transition:.25s;white-space:nowrap}
+.btn-ghost{padding:9px 18px;color:var(--text);border:1px solid var(--border);background:var(--card)}
+.btn-ghost:hover{border-color:var(--border-2);background:var(--card-2);transform:translateY(-1px)}
+.btn-grad{padding:10px 20px;background:var(--grad);color:#fff;box-shadow:0 10px 28px -10px rgba(217,70,239,.9);position:relative;overflow:hidden}
+.btn-grad:hover{transform:translateY(-2px);box-shadow:0 16px 38px -10px rgba(217,70,239,.95)}
+.btn-grad::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-100%);transition:.6s}
+.btn-grad:hover::after{transform:translateX(100%)}
+.btn-lg{padding:15px 30px;font-size:16px;border-radius:14px}
+.btn-xl{padding:18px 38px;font-size:17px;border-radius:16px}
+
+/* ============ 首页 · Hero ============ */
+.hero{position:relative;padding:60px 0 20px;text-align:center}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:99px;font-size:13px;font-weight:600;
+  background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);color:#d8c8ff;margin-bottom:26px}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.8s ease infinite}
+@keyframes pulse{50%{opacity:.4}}
+.hero h1{font-size:clamp(38px,6vw,72px);line-height:1.08;font-weight:900;letter-spacing:-1px;max-width:900px;margin:0 auto 22px}
+.hero h1 .glow{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 24px rgba(217,70,239,.45))}
+.hero .sub{max-width:640px;margin:0 auto 34px;color:var(--muted);font-size:18px}
+.hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+
+/* 魔法输入框 */
+.magic{max-width:760px;margin:0 auto 54px}
+.magic-bar{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 22px;border-radius:18px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);backdrop-filter:blur(12px);
+  transition:.3s;box-shadow:var(--shadow)}
+.magic-bar:focus-within{border-color:rgba(217,70,239,.5);box-shadow:0 0 0 4px rgba(217,70,239,.12),var(--shadow)}
+.magic-bar textarea{flex:1;background:transparent;border:none;outline:none;resize:none;color:var(--text);
+  font-family:inherit;font-size:16px;height:52px;padding:14px 0;line-height:1.5}
+.magic-bar textarea::placeholder{color:var(--dim)}
+.magic-bar .mic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--card-2);color:var(--muted);transition:.2s}
+.magic-bar .mic:hover{color:var(--text)}
+.magic-tags{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.magic-tags button{padding:7px 14px;border-radius:99px;font-size:13px;font-weight:600;color:var(--muted);
+  background:var(--card);border:1px solid var(--border);transition:.2s}
+.magic-tags button:hover{color:var(--text);border-color:var(--border-2);transform:translateY(-1px)}
+
+/* 悬浮预览卡片 */
+.stage{position:relative;height:360px;margin-bottom:20px}
+.pcard{position:absolute;left:50%;width:190px;border-radius:20px;overflow:hidden;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.85);border:1px solid var(--border-2);
+  transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.pcard .inner{aspect-ratio:9/16;position:relative;overflow:hidden}
+.pcard.p1{transform:translateX(-64%) rotate(-7deg) translateY(20px);z-index:1}
+.pcard.p2{transform:translateX(-22%) rotate(-2deg) translateY(-6px);z-index:3;width:210px}
+.pcard.p3{transform:translateX(20%) rotate(3deg) translateY(10px);z-index:2}
+.pcard.p4{transform:translateX(56%) rotate(9deg) translateY(30px);z-index:1}
+.stage:hover .p1{transform:translateX(-74%) rotate(-10deg) translateY(16px)}
+.stage:hover .p4{transform:translateX(66%) rotate(12deg) translateY(26px)}
+
+/* 统计条 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:10px auto 0}
+.stat{text-align:center;padding:26px 10px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border)}
+.stat .num{font-family:var(--font-en);font-size:34px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .lab{color:var(--muted);font-size:14px;margin-top:4px}
+
+/* ============ 通用区块 ============ */
+.section{padding:70px 0}
+.sec-head{text-align:center;margin-bottom:44px}
+.sec-head .tag{display:inline-block;font-family:var(--font-en);font-size:12px;letter-spacing:3px;color:var(--fuchsia);
+  font-weight:700;margin-bottom:12px;text-transform:uppercase}
+.sec-head h2{font-size:clamp(26px,3.6vw,42px);font-weight:900;letter-spacing:-.5px}
+.sec-head p{color:var(--muted);margin-top:12px;font-size:16px;max-width:560px;margin-left:auto;margin-right:auto}
+
+/* 特性卡片 */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.fcard{position:relative;padding:30px 28px;border-radius:22px;background:var(--card);border:1px solid var(--border);
+  overflow:hidden;transition:.35s}
+.fcard:hover{transform:translateY(-6px);border-color:var(--border-2);background:var(--card-2)}
+.fcard::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);opacity:0;transition:.35s}
+.fcard:hover::before{opacity:1}
+.fcard .ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;margin-bottom:18px;
+  background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(217,70,239,.15));border:1px solid rgba(217,70,239,.25)}
+.fcard .ic svg{width:24px;height:24px;stroke:#e9d5ff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fcard h3{font-size:18px;font-weight:800;margin-bottom:9px}
+.fcard p{color:var(--muted);font-size:14.5px}
+
+/* 风格展示 */
+.styles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.style-card{position:relative;border-radius:20px;overflow:hidden;aspect-ratio:16/10;cursor:pointer;
+  border:1px solid var(--border);transition:.35s}
+.style-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:var(--shadow)}
+.style-card .sc-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:.5s}
+.style-card:hover .sc-bg{transform:scale(1.1)}
+.style-card .sc-veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent 60%)}
+.style-card .sc-name{position:absolute;left:16px;bottom:14px;font-weight:800;font-size:17px}
+.style-card .sc-en{position:absolute;right:14px;top:14px;font-family:var(--font-en);font-size:10px;letter-spacing:2px;
+  padding:4px 10px;border-radius:99px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);color:#fff}
+
+/* 流程 */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.step{position:relative;padding:34px 30px;border-radius:22px;background:var(--card);border:1px solid var(--border);text-align:center}
+.step .s-num{width:56px;height:56px;margin:0 auto 20px;border-radius:16px;display:grid;place-items:center;
+  font-family:var(--font-en);font-weight:800;font-size:22px;color:#fff;background:var(--grad);box-shadow:0 10px 26px -8px rgba(217,70,239,.7)}
+.step h3{font-size:19px;font-weight:800;margin-bottom:10px}
+.step p{color:var(--muted);font-size:14.5px}
+.step .arrow{position:absolute;top:50%;right:-30px;transform:translateY(-50%);color:var(--dim);font-size:24px}
+.step:last-child .arrow{display:none}
+
+/* 作品卡片网格 */
+.reel-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.reel{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:9/16;cursor:pointer;border:1px solid var(--border);
+  transition:.35s;background:#14141f}
+.reel:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--border-2)}
+.reel .thumb{position:absolute;inset:0}
+.reel .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 42%)}
+.reel .info{position:absolute;left:12px;right:12px;bottom:12px;z-index:3}
+.reel .title{font-weight:800;font-size:14.5px;line-height:1.3;margin-bottom:6px}
+.reel .meta{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--muted)}
+.reel .meta svg{width:13px;height:13px}
+.reel .ep-badge{position:absolute;top:10px;left:10px;z-index:3;padding:3px 9px;border-radius:7px;font-size:10.5px;font-weight:700;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16)}
+.reel .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);z-index:3;
+  width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.16);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.35);display:grid;place-items:center;opacity:0;transition:.3s}
+.reel:hover .play{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.reel .play svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+
+/* 评价 */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.quote{padding:30px 28px;border-radius:22px;background:var(--card);border:1px solid var(--border)}
+.quote .stars{color:var(--amber);letter-spacing:2px;margin-bottom:14px;font-size:15px}
+.quote p{color:#d6d6e6;font-size:15px;margin-bottom:20px}
+.quote .who{display:flex;align-items:center;gap:12px}
+.quote .ava{width:42px;height:42px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff}
+.quote .who b{font-size:14px;display:block}
+.quote .who span{font-size:12.5px;color:var(--dim)}
+
+/* CTA 横幅 */
+.cta-banner{position:relative;border-radius:28px;overflow:hidden;padding:70px 40px;text-align:center;
+  background:linear-gradient(120deg,rgba(139,92,246,.35),rgba(217,70,239,.28) 50%,rgba(251,113,133,.3));border:1px solid var(--border-2)}
+.cta-banner::before{content:"";position:absolute;inset:0;opacity:.35;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:44px 44px}
+.cta-banner h2{font-size:clamp(26px,4vw,42px);font-weight:900;margin-bottom:14px;position:relative}
+.cta-banner p{color:#e7e3ff;margin-bottom:30px;font-size:16px;position:relative}
+
+/* ============ 创作台 ============ */
+.studio{display:grid;grid-template-columns:1fr 460px;gap:28px;align-items:start;padding-bottom:80px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:26px}
+.panel h3{font-size:16px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.panel h3 .ic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(217,70,239,.2));
+  display:grid;place-items:center;border:1px solid rgba(217,70,239,.3)}
+.panel h3 .ic svg{width:15px;height:15px;stroke:#e9d5ff;fill:none;stroke-width:2}
+.field{margin-bottom:20px}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:9px;letter-spacing:.3px}
+.field label em{color:var(--fuchsia);font-style:normal}
+.ta{width:100%;min-height:120px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;color:var(--text);
+  padding:14px 16px;font-family:inherit;font-size:14.5px;resize:vertical;outline:none;transition:.25s;line-height:1.7}
+.ta:focus{border-color:rgba(217,70,239,.5);box-shadow:0 0 0 3px rgba(217,70,239,.12)}
+.ta-row{display:flex;gap:10px;margin-top:12px}
+.mini-btn{padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;background:var(--card-2);border:1px solid var(--border);color:var(--text);transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.mini-btn:hover{border-color:var(--border-2);transform:translateY(-1px)}
+.mini-btn svg{width:14px;height:14px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{padding:9px 15px;border-radius:11px;font-size:13.5px;font-weight:700;color:var(--muted);background:var(--card-2);
+  border:1px solid var(--border);transition:.2s;position:relative}
+.chip:hover{color:var(--text);border-color:var(--border-2)}
+.chip.on{color:#fff;background:linear-gradient(120deg,rgba(139,92,246,.85),rgba(217,70,239,.85));border-color:transparent;
+  box-shadow:0 8px 20px -8px rgba(217,70,239,.8)}
+.chip .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:middle}
+.seg{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:13px;padding:4px;gap:4px}
+.seg button{flex:1;padding:9px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--muted);transition:.2s}
+.seg button.on{background:var(--card-2);color:var(--text);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.voice{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--card-2);border:1px solid var(--border);margin-bottom:10px;cursor:pointer;transition:.2s}
+.voice:hover{border-color:var(--border-2)}
+.voice.on{border-color:rgba(217,70,239,.55);background:rgba(217,70,239,.1)}
+.voice .v-ava{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.voice .v-name{font-size:14px;font-weight:700}
+.voice .v-desc{font-size:12px;color:var(--dim)}
+.voice .v-play{margin-left:auto;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);display:grid;place-items:center}
+.voice .v-play svg{width:12px;height:12px;fill:#fff;margin-left:2px}
+.gen-btn{width:100%;padding:18px;border-radius:16px;font-size:17px;font-weight:800;color:#fff;background:var(--grad);
+  box-shadow:0 14px 40px -12px rgba(217,70,239,.9);margin-top:8px;position:relative;overflow:hidden;transition:.3s}
+.gen-btn:hover{transform:translateY(-2px)}
+.gen-btn:disabled{opacity:.6;cursor:not-allowed}
+.gen-btn .spark{font-size:19px}
+
+/* 预览面板 */
+.preview{position:sticky;top:96px}
+.pv-stage{position:relative;aspect-ratio:9/16;border-radius:20px;overflow:hidden;border:1px solid var(--border-2);background:#10101c}
+.pv-stage .pv-inner{position:absolute;inset:0}
+.pv-stage .pv-veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent 45%)}
+.pv-stage .pv-title{position:absolute;left:16px;right:16px;bottom:16px;z-index:4}
+.pv-stage .pv-title .tt{font-size:19px;font-weight:900;margin-bottom:6px}
+.pv-stage .pv-title .dd{font-size:12.5px;color:var(--muted)}
+.pv-tag{position:absolute;top:14px;left:14px;z-index:4;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2)}
+/* 进度遮罩 */
+.gen-overlay{position:absolute;inset:0;z-index:6;background:rgba(8,8,14,.9);backdrop-filter:blur(6px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;
+  opacity:0;pointer-events:none;transition:.4s}
+.gen-overlay.show{opacity:1;pointer-events:auto}
+.gen-overlay .g-ico{width:70px;height:70px;border-radius:22px;background:var(--grad);display:grid;place-items:center;margin-bottom:22px;
+  animation:spin 2.4s linear infinite;box-shadow:0 0 40px rgba(217,70,239,.6)}
+.gen-overlay .g-ico svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-overlay .g-step{font-size:15px;font-weight:700;margin-bottom:18px}
+.gen-overlay .g-bar{width:82%;height:7px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:12px}
+.gen-overlay .g-bar i{display:block;height:100%;width:0%;background:var(--grad);border-radius:99px;transition:width .5s ease}
+.gen-overlay .g-pct{font-family:var(--font-en);font-size:13px;color:var(--muted)}
+.gen-overlay .g-steps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:22px}
+.gen-overlay .g-steps span{font-size:11px;padding:4px 10px;border-radius:99px;background:var(--card-2);border:1px solid var(--border);color:var(--dim);transition:.3s}
+.gen-overlay .g-steps span.done{color:#fff;background:rgba(74,222,128,.18);border-color:rgba(74,222,128,.5)}
+.gen-overlay .g-steps span.cur{color:#fff;background:rgba(217,70,239,.25);border-color:rgba(217,70,239,.6)}
+/* 完成状态 */
+.done-actions{position:absolute;left:14px;right:14px;bottom:14px;z-index:5;display:none;gap:10px;flex-direction:column}
+.done-actions.show{display:flex}
+.done-actions .btn{width:100%}
+.pv-actions{position:absolute;left:14px;right:14px;bottom:14px;z-index:5;display:flex;gap:10px}
+.pv-actions .btn{flex:1;padding:12px;font-size:14px}
+/* 分镜 */
+.sb{display:flex;gap:10px;margin-top:16px;overflow-x:auto;padding-bottom:6px}
+.sb::-webkit-scrollbar{height:6px}
+.sb .frame{flex:0 0 auto;width:74px;aspect-ratio:9/16;border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative;background:#14141f}
+.sb .frame .f-n{position:absolute;bottom:5px;left:6px;font-size:9px;color:#fff;background:rgba(0,0,0,.5);padding:1px 5px;border-radius:4px;z-index:2}
+.sb .frame.add{border:1px dashed var(--border-2);display:grid;place-items:center;color:var(--dim);font-size:20px;background:var(--card)}
+.pv-hint{display:flex;align-items:center;gap:8px;margin-top:16px;padding:12px 15px;border-radius:13px;font-size:13px;color:var(--muted);
+  background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25)}
+
+/* ============ 作品库 ============ */
+.gallery-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:18px;margin-bottom:26px}
+.gallery-head h1{font-size:32px;font-weight:900}
+.gallery-head p{color:var(--muted);margin-top:6px}
+.g-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.g-tab{padding:9px 17px;border-radius:99px;font-size:14px;font-weight:700;color:var(--muted);background:var(--card);border:1px solid var(--border);transition:.2s}
+.g-tab:hover{color:var(--text)}
+.g-tab.on{color:#fff;background:var(--grad);border-color:transparent;box-shadow:0 8px 22px -8px rgba(217,70,239,.7)}
+.search{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:13px;background:var(--card);border:1px solid var(--border);min-width:240px}
+.search input{background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:14px;flex:1}
+.search svg{width:17px;height:17px;stroke:var(--dim);fill:none;stroke-width:2}
+.gallery-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;padding-bottom:90px}
+
+/* ============ 定价 ============ */
+.bill-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:40px;font-weight:700;color:var(--muted)}
+.bill-toggle .switch{width:52px;height:28px;border-radius:99px;background:var(--card-2);border:1px solid var(--border);position:relative;cursor:pointer;transition:.3s}
+.bill-toggle .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--grad);transition:.3s}
+.bill-toggle .switch.on{background:rgba(217,70,239,.3);border-color:rgba(217,70,239,.5)}
+.bill-toggle .switch.on::after{left:27px}
+.bill-toggle .save{color:var(--green);font-size:13px;background:rgba(74,222,128,.12);padding:3px 10px;border-radius:99px}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch;padding-bottom:90px}
+.plan{position:relative;border-radius:24px;padding:34px 30px;background:var(--card);border:1px solid var(--border);transition:.3s}
+.plan:hover{transform:translateY(-6px);border-color:var(--border-2)}
+.plan.hot{border-color:rgba(217,70,239,.6);background:linear-gradient(160deg,rgba(139,92,246,.16),rgba(217,70,239,.1))}
+.plan .hot-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);padding:5px 16px;border-radius:99px;font-size:12px;font-weight:800;color:#fff;background:var(--grad);box-shadow:0 8px 22px -6px rgba(217,70,239,.8)}
+.plan .p-name{font-size:15px;font-weight:800;color:var(--muted);letter-spacing:1px}
+.plan .p-price{font-family:var(--font-en);font-size:46px;font-weight:900;margin:14px 0 4px}
+.plan .p-price small{font-size:16px;font-weight:600;color:var(--muted)}
+.plan .p-per{color:var(--dim);font-size:13px;margin-bottom:24px}
+.plan ul{list-style:none;margin-bottom:28px}
+.plan li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;font-size:14.5px;color:#cfcfe2}
+.plan li svg{width:18px;height:18px;flex-shrink:0;margin-top:2px;stroke:var(--green);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.plan .btn{width:100%;padding:14px}
+
+/* ============ 播放器 ============ */
+.player-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(4,4,10,.82);backdrop-filter:blur(14px)}
+.player-modal.show{display:flex;animation:viewIn .35s ease}
+.player-box{display:flex;gap:26px;align-items:stretch;max-width:980px;width:100%}
+.player-main{position:relative;aspect-ratio:9/16;height:min(78vh,680px);border-radius:24px;overflow:hidden;border:1px solid var(--border-2);background:#0c0c16;box-shadow:var(--shadow)}
+.player-main .thumb{position:absolute;inset:0}
+.player-main .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9),transparent 50%)}
+.player-main .topbar{position:absolute;top:16px;left:18px;right:18px;z-index:5;display:flex;align-items:center;gap:12px}
+.player-main .topbar .close{margin-left:auto;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.5);display:grid;place-items:center;transition:.2s}
+.player-main .topbar .close:hover{background:rgba(0,0,0,.75)}
+.player-main .topbar .close svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round}
+.player-main .bottom{position:absolute;left:18px;right:18px;bottom:16px;z-index:5}
+.player-main .p-tt{font-size:18px;font-weight:900;margin-bottom:6px}
+.player-main .p-meta{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.player-main .p-progress{height:5px;border-radius:99px;background:rgba(255,255,255,.2);position:relative;cursor:pointer;margin-bottom:14px}
+.player-main .p-progress i{position:absolute;left:0;top:0;bottom:0;width:38%;border-radius:99px;background:var(--grad)}
+.player-main .p-progress .knob{position:absolute;left:38%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(217,70,239,.9)}
+.player-main .p-ctrl{display:flex;align-items:center;gap:16px}
+.player-main .p-ctrl .big{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;color:#0a0a12}
+.player-main .p-ctrl .big svg{width:20px;height:20px;fill:#0a0a12;margin-left:2px}
+.player-main .p-ctrl .time{font-family:var(--font-en);font-size:13px;color:var(--muted)}
+.player-side{display:flex;flex-direction:column;gap:12px;justify-content:flex-end;width:220px}
+.p-act{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--border);transition:.2s;cursor:pointer}
+.p-act:hover{transform:translateY(-3px);border-color:var(--border-2)}
+.p-act .a-ic{width:40px;height:40px;border-radius:50%;background:var(--card-2);display:grid;place-items:center;font-size:18px}
+.p-act b{font-size:12px;font-weight:700;color:var(--muted)}
+.player-desc{max-width:420px;width:100%;display:none}
+
+/* ============ 页脚 ============ */
+footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:30px;margin-bottom:40px}
+.foot-grid .brand p{color:var(--muted);font-size:14px;margin-top:14px;max-width:260px}
+.foot-grid h4{font-size:14px;font-weight:800;margin-bottom:16px}
+.foot-grid a{display:block;color:var(--muted);font-size:14px;padding:5px 0;transition:.2s}
+.foot-grid a:hover{color:var(--text)}
+.foot-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--dim);font-size:13px}
+
+/* ============ 工具类 ============ */
+.ht{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.22) 1.2px,transparent 1.2px);background-size:12px 12px;opacity:.5;mix-blend-mode:overlay}
+.muted{color:var(--muted)}
+.hide{display:none!important}
+
+/* ============ 响应式 ============ */
+@media(max-width:1080px){
+  .features,.styles{grid-template-columns:repeat(2,1fr)}
+  .reel-grid,.gallery-grid{grid-template-columns:repeat(4,1fr)}
+  .studio{grid-template-columns:1fr}
+  .preview{position:static;max-width:420px}
+  .foot-grid{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:720px){
+  .nav-links{display:none}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .features,.styles,.steps,.quotes,.plans{grid-template-columns:1fr}
+  .reel-grid,.gallery-grid{grid-template-columns:repeat(3,1fr)}
+  .step .arrow{display:none}
+  .stage{height:300px}
+  .pcard{width:150px}
+  .pcard.p2{width:168px}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .player-box{flex-direction:column;align-items:center}
+  .player-side{flex-direction:row;width:auto}
+}
+</style>
+</head>
+<body>
+<div class="bg-fx"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
+<div class="grid-overlay"></div>
+
+<!-- ============ 导航 ============ -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="logo" href="#" onclick="switchView('home');return false;">
+      <span class="logo-mark"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+      <b>漫剧工场</b><span>REELMANGA</span>
+    </a>
+    <div class="nav-links">
+      <button class="active" data-view="home" onclick="switchView('home')">首页</button>
+      <button data-view="studio" onclick="switchView('studio')">创作台</button>
+      <button data-view="gallery" onclick="switchView('gallery')">作品库</button>
+      <button data-view="pricing" onclick="switchView('pricing')">定价</button>
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-ghost">登录</button>
+      <button class="btn btn-grad" onclick="switchView('studio')">⚡ 开始创作</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ 首页 ============ -->
+<main id="view-home" class="view active">
+  <section class="hero wrap">
+    <div class="badge"><span class="dot"></span>全新 AI 漫剧引擎 v3.0 已上线 · 免费体验</div>
+    <h1>一句话，<span class="glow">一键生成</span><br/>爆款漫剧</h1>
+    <p class="sub">从小说、剧本到成片 —— AI 自动完成分镜、角色、配音与配乐，把你的故事变成会动的漫画，即刻多平台发布变现。</p>
+    <div class="hero-cta">
+      <button class="btn btn-grad btn-xl" onclick="switchView('studio')">✨ 立即开始创作</button>
+      <button class="btn btn-ghost btn-xl" onclick="switchView('gallery')">▶ 观看热门作品</button>
+    </div>
+
+    <div class="magic">
+      <div class="magic-bar">
+        <textarea id="heroInput" rows="1" placeholder="输入你的故事，例如：女主重生回到被退婚那天，她决定手撕渣男、逆袭成豪门……"></textarea>
+        <span class="mic" title="语音输入">🎤</span>
+        <button class="btn btn-grad" onclick="heroGenerate()">一键生成</button>
+      </div>
+      <div class="magic-tags">
+        <button onclick="fillHero('甜宠逆袭')">🔥 甜宠逆袭</button>
+        <button onclick="fillHero('古风权谋')">⚔️ 古风权谋</button>
+        <button onclick="fillHero('都市玄幻')">🌀 都市玄幻</button>
+        <button onclick="fillHero('悬疑惊悚')">🕯️ 悬疑惊悚</button>
+        <button onclick="fillHero('系统修仙')">🎮 系统修仙</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="pcard p1"><div class="inner" id="pc1"></div></div>
+      <div class="pcard p2"><div class="inner" id="pc2"></div></div>
+      <div class="pcard p3"><div class="inner" id="pc3"></div></div>
+      <div class="pcard p4"><div class="inner" id="pc4"></div></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num">120万+</div><div class="lab">注册创作者</div></div>
+      <div class="stat"><div class="num">8600万+</div><div class="lab">累计生成漫剧</div></div>
+      <div class="stat"><div class="num">32万</div><div class="lab">每日新作上线</div></div>
+      <div class="stat"><div class="num">4.9分</div><div class="lab">创作者满意度</div></div>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div class="tag">Core Features</div>
+      <h2>一站式漫剧智能生产线</h2>
+      <p>六大 AI 引擎协同工作，从创意到成片全程自动化，告别繁琐制作。</p>
+    </div>
+    <div class="features">
+      <div class="fcard">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 3v18"/></svg></div>
+        <h3>AI 智能分镜</h3>
+        <p>自动拆解剧情节奏，生成电影级分镜脚本与镜头运动，节奏感十足。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg></div>
+        <h3>角色一致性引擎</h3>
+        <p>锁定主角形象与服饰，跨集跨镜头保持脸型、气质百分百一致。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6a6 6 0 1 0 6 6"/><path d="M12 10a2 2 0 1 0 2 2"/></svg></div>
+        <h3>六大风格引擎</h3>
+        <p>国漫、日漫、美漫、写实、水墨、像素……一键切换不同艺术风格。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z"/><path d="M15 9v6M18 8v8M9 10v4"/></svg></div>
+        <h3>AI 多音色配音</h3>
+        <p>上百种情感化音色，自动匹配角色声线，支持多语言与方言。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 14v-4M8 18V6M12 20V4M16 17V7M20 12V8"/></svg></div>
+        <h3>智能配乐音效</h3>
+        <p>根据情绪自动适配 BGM 与音效，高潮、反转、泪点都恰到好处。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 15h14v6H5z"/></svg></div>
+        <h3>一键多平台发布</h3>
+        <p>自动裁剪标题、封面与话题，直发抖音、快手、视频号等平台。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div class="tag">Style Engine</div>
+      <h2>一种故事，百种风格</h2>
+      <p>同一条脚本，自由切换视觉风格，总有一款戳中你的观众。</p>
+    </div>
+    <div class="styles" id="styleList"></div>
+  </section>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div class="tag">How It Works</div>
+      <h2>三步，从故事到爆款</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="s-num">1</div>
+        <h3>输入你的故事</h3>
+        <p>粘贴小说、剧本，或一句话灵感，也可以导入已有文档。</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="step">
+        <div class="s-num">2</div>
+        <h3>AI 一键生成</h3>
+        <p>选择风格、音色与集数，AI 自动完成分镜、角色、配音与成片。</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="step">
+        <div class="s-num">3</div>
+        <h3>发布 & 变现</h3>
+        <p>一键发布到全平台，追踪数据，接广告与付费解锁持续赚钱。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div class="tag">Hot Now</div>
+      <h2>本周爆款漫剧</h2>
+      <p>看看其他创作者正在用 AI 生成的热门作品。</p>
+    </div>
+    <div class="reel-grid" id="homeReels"></div>
+  </section>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div class="tag">Creators</div>
+      <h2>创作者都在说</h2>
+    </div>
+    <div class="quotes">
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>“以前做一集漫剧要花两周，现在一杯咖啡的时间就出成片了。AI 分镜的节奏感比我自己剪的还专业。”</p>
+        <div class="who"><span class="ava">林</span><div><b>林小雨</b><span>都市甜宠 · 86万粉丝</span></div></div>
+      </div>
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>“最惊喜的是角色一致性，主角形象跨 60 集都没崩。配音的情感表达也很自然，观众根本听不出是 AI。”</p>
+        <div class="who"><span class="ava">陈</span><div><b>陈默</b><span>玄幻修真 · 130万粉丝</span></div></div>
+      </div>
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>“把囤了三年的小说全都一键生成漫剧了，单月广告分成破 10 万，终于把爱好变成了事业。”</p>
+        <div class="who"><span class="ava">苏</span><div><b>苏念</b><span>古风权谋 · 210万粉丝</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="cta-banner">
+      <h2>你的下一个爆款，只差一次点击</h2>
+      <p>免费生成你的第一部漫剧，无需任何制作经验。</p>
+      <button class="btn btn-grad btn-lg" onclick="switchView('studio')">🚀 免费开始创作</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="brand">
+          <a class="logo" href="#" onclick="switchView('home');return false;">
+            <span class="logo-mark"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+            <b>漫剧工场</b><span>REELMANGA</span>
+          </a>
+          <p>用 AI 让每个人都能成为漫剧创作者。一句话，一键生成爆款漫剧。</p>
+        </div>
+        <div>
+          <h4>产品</h4>
+          <a href="#" onclick="switchView('studio');return false;">创作台</a>
+          <a href="#" onclick="switchView('gallery');return false;">作品库</a>
+          <a href="#" onclick="switchView('pricing');return false;">定价方案</a>
+          <a href="#">风格引擎</a>
+        </div>
+        <div>
+          <h4>资源</h4>
+          <a href="#">创作者教程</a>
+          <a href="#">爆款选题库</a>
+          <a href="#">版权音乐</a>
+          <a href="#">帮助中心</a>
+        </div>
+        <div>
+          <h4>社区</h4>
+          <a href="#">创作者学院</a>
+          <a href="#">官方社群</a>
+          <a href="#">创作大赛</a>
+          <a href="#">达人招募</a>
+        </div>
+        <div>
+          <h4>公司</h4>
+          <a href="#">关于我们</a>
+          <a href="#">加入我们</a>
+          <a href="#">服务条款</a>
+          <a href="#">隐私政策</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2025 REELMANGA 漫剧工场 · 本页面为高保真原型演示</span>
+        <span>Made with ❤️ for creators</span>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ============ 创作台 ============ -->
+<main id="view-studio" class="view">
+  <div class="wrap">
+    <div style="margin-bottom:26px">
+      <div class="tag" style="font-family:var(--font-en);font-size:12px;letter-spacing:3px;color:var(--fuchsia);font-weight:700;margin-bottom:8px">AI Studio</div>
+      <h1 style="font-size:32px;font-weight:900">创作台</h1>
+      <p class="muted" style="margin-top:6px">输入故事，配置风格，一键生成你的漫剧。</p>
+    </div>
+
+    <div class="studio">
+      <!-- 左侧配置 -->
+      <div class="panel">
+        <h3><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>故事脚本</h3>
+        <div class="field">
+          <textarea class="ta" id="scriptInput" placeholder="粘贴或输入你的故事脚本、小说段落，或一句话灵感……&#10;&#10;例如：苏念重生回到被退婚那天，未婚夫当众羞辱她。她冷笑撕毁婚书，转身嫁给残废王爷。三年后，王爷踏碎皇城，只为她的一句“我要你”……"></textarea>
+          <div class="ta-row">
+            <button class="mini-btn"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>导入文档</button>
+            <button class="mini-btn">✨ AI 扩写润色</button>
+            <button class="mini-btn">📋 爆款模板</button>
+          </div>
+        </div>
+
+        <h3><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></span>视觉风格</h3>
+        <div class="field">
+          <div class="chips" id="styleChips"></div>
+        </div>
+
+        <h3><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/></svg></span>画幅与集数</h3>
+        <div class="field">
+          <label>画面比例</label>
+          <div class="seg" id="ratioSeg">
+            <button class="on" data-v="9:16">9:16 竖屏</button>
+            <button data-v="16:9">16:9 横屏</button>
+            <button data-v="1:1">1:1 方形</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>每集时长 <em>约 1 分钟</em></label>
+          <div class="seg" id="epSeg">
+            <button data-v="1集">1 集</button>
+            <button class="on" data-v="5集">5 集</button>
+            <button data-v="10集">10 集</button>
+            <button data-v="20集">20 集</button>
+          </div>
+        </div>
+
+        <h3><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z"/><path d="M15 9v6M18 8v8"/></svg></span>配音音色</h3>
+        <div class="field">
+          <div class="voice on" onclick="pickVoice(this)">
+            <span class="v-ava" style="background:linear-gradient(135deg,#f472b6,#c026d3)">苏</span>
+            <div><div class="v-name">苏念 · 御姐音</div><div class="v-desc">清冷坚定 · 女主</div></div>
+            <span class="v-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          </div>
+          <div class="voice" onclick="pickVoice(this)">
+            <span class="v-ava" style="background:linear-gradient(135deg,#60a5fa,#6366f1)">墨</span>
+            <div><div class="v-name">墨尘 · 低沉男声</div><div class="v-desc">霸总 · 男主</div></div>
+            <span class="v-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          </div>
+          <div class="voice" onclick="pickVoice(this)">
+            <span class="v-ava" style="background:linear-gradient(135deg,#34d399,#0ea5e9)">小</span>
+            <div><div class="v-name">小七 · 活泼女声</div><div class="v-desc">元气甜妹 · 配角</div></div>
+            <span class="v-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          </div>
+        </div>
+
+        <h3><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>背景音乐</h3>
+        <div class="field">
+          <div class="chips" id="bgmChips"></div>
+        </div>
+
+        <button class="gen-btn" id="genBtn" onclick="startGenerate()"><span class="spark">⚡</span> 一键生成漫剧</button>
+        <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--dim)">预计消耗 40 算力点 · 约 90 秒</div>
+      </div>
+
+      <!-- 右侧预览 -->
+      <div class="preview">
+        <div class="pv-stage">
+          <div class="pv-inner" id="pvInner"></div>
+          <span class="pv-tag">AI 预览</span>
+          <div class="pv-veil"></div>
+          <div class="pv-title" id="pvTitle">
+            <div class="tt">《重生之凤逆天下》</div>
+            <div class="dd">9:16 · 第 1 集 · 国漫写实</div>
+          </div>
+
+          <!-- 生成进度 -->
+          <div class="gen-overlay" id="genOverlay">
+            <div class="g-ico"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8"/></svg></div>
+            <div class="g-step" id="genStep">正在解析剧本…</div>
+            <div class="g-bar"><i id="genBar"></i></div>
+            <div class="g-pct" id="genPct">0%</div>
+            <div class="g-steps" id="genSteps">
+              <span data-i="0">解析剧本</span>
+              <span data-i="1">生成分镜</span>
+              <span data-i="2">生成角色</span>
+              <span data-i="3">配音合成</span>
+              <span data-i="4">渲染成片</span>
+            </div>
+          </div>
+
+          <!-- 默认操作 -->
+          <div class="pv-actions" id="pvActions">
+            <button class="btn btn-ghost" onclick="openPlayer()">▶ 预览</button>
+            <button class="btn btn-grad" onclick="startGenerate()">重新生成</button>
+          </div>
+
+          <!-- 完成操作 -->
+          <div class="done-actions" id="doneActions">
+            <button class="btn btn-grad" onclick="openPlayer()">▶ 播放成片</button>
+            <button class="btn btn-ghost">⬇ 下载视频</button>
+            <button class="btn btn-ghost">📤 一键发布</button>
+          </div>
+        </div>
+
+        <div class="sb" id="storyboard">
+          <div class="frame" id="sb0"></div>
+          <div class="frame" id="sb1"></div>
+          <div class="frame" id="sb2"></div>
+          <div class="frame" id="sb3"></div>
+          <div class="frame" id="sb4"></div>
+          <div class="frame add" title="添加镜头">+</div>
+        </div>
+        <div class="pv-hint">💡 生成后可在右侧分镜中微调每一帧的构图、台词与转场。</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ 作品库 ============ -->
+<main id="view-gallery" class="view">
+  <div class="wrap">
+    <div class="gallery-head">
+      <div>
+        <h1>作品库</h1>
+        <p>发现灵感，看看大家都在生成什么。</p>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="搜索作品、题材或创作者…" />
+      </div>
+    </div>
+    <div class="g-tabs" id="gTabs" style="margin-bottom:28px">
+      <button class="g-tab on" data-g="全部">全部</button>
+      <button class="g-tab" data-g="古风仙侠">古风仙侠</button>
+      <button class="g-tab" data-g="都市甜宠">都市甜宠</button>
+      <button class="g-tab" data-g="玄幻修真">玄幻修真</button>
+      <button class="g-tab" data-g="系统逆袭">系统逆袭</button>
+      <button class="g-tab" data-g="悬疑惊悚">悬疑惊悚</button>
+      <button class="g-tab" data-g="穿越重生">穿越重生</button>
+      <button class="g-tab" data-g="豪门商战">豪门商战</button>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</main>
+
+<!-- ============ 定价 ============ -->
+<main id="view-pricing" class="view">
+  <div class="wrap">
+    <div class="sec-head" style="margin-top:20px">
+      <div class="tag">Pricing</div>
+      <h2>选择适合你的创作方案</h2>
+      <p>所有方案均可免费试用，随时升级或取消。</p>
+    </div>
+    <div class="bill-toggle">
+      <span style="color:var(--text)">月付</span>
+      <div class="switch on" onclick="this.classList.toggle('on')"></div>
+      <span>年付</span>
+      <span class="save">立省 40%</span>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <div class="p-name">免费版</div>
+        <div class="p-price">¥0<small>/月</small></div>
+        <div class="p-per">适合尝鲜体验</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>每月 3 次免费生成</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>720P 高清导出</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>基础风格引擎</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>社区作品展示</li>
+        </ul>
+        <button class="btn btn-ghost">开始使用</button>
+      </div>
+      <div class="plan hot">
+        <div class="hot-badge">最受欢迎</div>
+        <div class="p-name">创作者 Pro</div>
+        <div class="p-price">¥99<small>/月</small></div>
+        <div class="p-per">适合内容创作者</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>每月 120 次生成</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>4K 超清 · 无水印导出</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>全风格引擎 + 商用授权</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>多平台一键发布 + 数据看板</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>优先排队渲染</li>
+        </ul>
+        <button class="btn btn-grad">立即升级</button>
+      </div>
+      <div class="plan">
+        <div class="p-name">工作室 Studio</div>
+        <div class="p-price">¥499<small>/月</small></div>
+        <div class="p-per">适合团队与 MCN</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>不限量生成 · 团队协作</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>专属角色模型定制</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>API 接口接入</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>1v1 专属客户成功经理</li>
+        </ul>
+        <button class="btn btn-ghost">联系我们</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ 播放器弹窗 ============ -->
+<div class="player-modal" id="playerModal" onclick="if(event.target===this)closePlayer()">
+  <div class="player-box">
+    <div class="player-main">
+      <div class="thumb" id="playerThumb"></div>
+      <div class="veil"></div>
+      <div class="topbar">
+        <span class="pv-tag" style="position:static">《重生之凤逆天下》</span>
+        <span class="close" onclick="closePlayer()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      </div>
+      <div class="bottom">
+        <div class="p-tt">第 1 集 · 被退婚那天，她笑了</div>
+        <div class="p-meta">苏念工作室 · 860万播放 · 3天前更新</div>
+        <div class="p-progress"><i></i><span class="knob"></span></div>
+        <div class="p-ctrl">
+          <span class="big" id="playBtn" onclick="togglePlay(this)"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="time" id="timeTxt">00:23 / 01:00</span>
+          <span style="margin-left:auto;font-size:20px">🔔</span>
+          <span style="font-size:20px">⚡</span>
+        </div>
+      </div>
+    </div>
+    <div class="player-side">
+      <div class="p-act"><span class="a-ic">👍</span><b>3.2万</b></div>
+      <div class="p-act"><span class="a-ic">⭐</span><b>收藏</b></div>
+      <div class="p-act"><span class="a-ic">💬</span><b>860</b></div>
+      <div class="p-act"><span class="a-ic">↗</span><b>分享</b></div>
+      <div class="p-act"><span class="a-ic">⬇</span><b>下载</b></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= 角色 SVG（剪影插画） ================= */
+const SILO = "#0e0b18";
+function charSVG(type, accent){
+  const a = accent || "#d946ef";
+  const glow = `<ellipse cx="80" cy="118" rx="46" ry="46" fill="${a}" opacity=".28"/>`;
+  let body = "";
+  if(type === "girl"){
+    body = `
+    <path d="M80 16 C46 22 32 46 32 76 L32 108 C32 148 38 168 44 190 L58 180 C54 152 52 130 52 108 L52 84 C57 62 66 50 80 48 C94 50 103 62 108 84 L108 108 C108 130 106 152 102 180 L116 190 C122 168 128 148 128 108 L128 76 C128 46 114 22 80 16 Z" fill="${SILO}"/>
+    <circle cx="80" cy="72" r="25" fill="${SILO}"/>`;
+  } else if(type === "boy"){
+    body = `
+    <path d="M80 16 C52 22 40 44 40 72 L40 100 C40 130 40 160 44 190 L60 182 C56 158 54 132 54 106 L54 88 C60 64 68 52 80 50 C92 52 100 64 106 88 L106 106 C106 132 104 158 100 182 L116 190 C120 160 120 130 120 100 L120 72 C120 44 108 22 80 16 Z" fill="${SILO}"/>
+    <circle cx="80" cy="70" r="24" fill="${SILO}"/>`;
+  } else if(type === "couple"){
+    body = `
+    <path d="M52 20 C30 26 22 44 22 66 L22 92 C22 122 24 150 28 176 L42 168 C38 142 36 122 36 96 L36 76 C42 56 48 46 56 44 C64 46 70 56 76 76 L76 96 C76 122 74 142 70 168 L84 176 C88 150 90 122 90 92 L90 66 C90 44 82 26 60 20 Z" fill="${SILO}"/>
+    <path d="M98 30 C82 34 76 48 76 64 L76 84 C76 108 78 128 80 152 L90 146 C88 126 86 112 86 92 L86 74 C90 60 96 52 102 50 C108 52 114 60 118 74 L118 92 C118 112 116 126 114 146 L124 152 C126 128 128 108 128 84 L128 64 C128 48 122 34 106 30 Z" fill="${SILO}"/>
+    <circle cx="52" cy="52" r="17" fill="${SILO}"/>
+    <circle cx="100" cy="48" r="16" fill="${SILO}"/>`;
+  } else { // sword
+    body = `
+    <path d="M80 16 C52 22 40 44 40 72 L40 100 C40 130 40 160 44 190 L60 182 C56 158 54 132 54 106 L54 88 C60 64 68 52 80 50 C92 52 100 64 106 88 L106 106 C106 132 104 158 100 182 L116 190 C120 160 120 130 120 100 L120 72 C120 44 108 22 80 16 Z" fill="${SILO}"/>
+    <circle cx="80" cy="70" r="24" fill="${SILO}"/>
+    <path d="M118 120 L160 62" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".9"/>
+    <path d="M112 128 L126 114 M122 138 L130 128" stroke="${a}" stroke-width="4" stroke-linecap="round"/>`;
+  }
+  return `<svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMax meet" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:72%;height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))">${glow}${body}</svg>`;
+}
+
+/* ================= 缩略图生成 ================= */
+const GENRES = {
+  "古风仙侠": {g:"linear-gradient(160deg,#0ea5e9 0%,#312e81 60%,#1e1b4b 100%)", a:"#38bdf8", c:"girl", t:"#e0f2fe"},
+  "都市甜宠": {g:"linear-gradient(160deg,#fb7185 0%,#be185d 60%,#4a0e2e 100%)", a:"#fda4af", c:"couple", t:"#ffe4e6"},
+  "玄幻修真": {g:"linear-gradient(160deg,#8b5cf6 0%,#4c1d95 60%,#1e1b4b 100%)", a:"#c4b5fd", c:"sword", t:"#ede9fe"},
+  "系统逆袭": {g:"linear-gradient(160deg,#fb923c 0%,#dc2626 60%,#450a0a 100%)", a:"#fdba74", c:"boy", t:"#ffedd5"},
+  "悬疑惊悚": {g:"linear-gradient(160deg,#334155 0%,#0f172a 70%,#020617 100%)", a:"#ef4444", c:"girl", t:"#fecaca"},
+  "穿越重生": {g:"linear-gradient(160deg,#d946ef 0%,#7c3aed 60%,#2e1065 100%)", a:"#f0abfc", c:"girl", t:"#fae8ff"},
+  "豪门商战": {g:"linear-gradient(160deg,#fbbf24 0%,#b45309 55%,#451a03 100%)", a:"#fde68a", c:"couple", t:"#fef3c7"},
+  "热血少年": {g:"linear-gradient(160deg,#22d3ee 0%,#0891b2 55%,#164e63 100%)", a:"#a5f3fc", c:"boy", t:"#cffafe"},
+};
+const REELS = [
+  {t:"重生之凤逆天下", g:"古风仙侠", ep:"更新至 60 集", v:"2.1亿", l:"89万", c:"girl"},
+  {t:"甜宠：豪门千金的隐婚", g:"都市甜宠", ep:"已完结", v:"1.6亿", l:"66万", c:"couple"},
+  {t:"仙帝归来之都市战神", g:"玄幻修真", ep:"更新至 48 集", v:"9800万", l:"41万", c:"sword"},
+  {t:"我的系统不正经", g:"系统逆袭", ep:"更新至 32 集", v:"7600万", l:"33万", c:"boy"},
+  {t:"恐怖直播间：开局遇鬼", g:"悬疑惊悚", ep:"更新至 25 集", v:"5400万", l:"28万", c:"girl"},
+  {t:"穿越之王妃是神医", g:"穿越重生", ep:"已完结", v:"8900万", l:"52万", c:"girl"},
+  {t:"绝世赘婿", g:"豪门商战", ep:"更新至 72 集", v:"1.2亿", l:"47万", c:"couple"},
+  {t:"逆袭吧！废柴少年", g:"热血少年", ep:"更新至 40 集", v:"6100万", l:"25万", c:"boy"},
+  {t:"凤倾天下：邪王宠妻", g:"古风仙侠", ep:"已完结", v:"3.4亿", l:"130万", c:"girl"},
+  {t:"替嫁甜妻是大佬", g:"都市甜宠", ep:"更新至 55 集", v:"1.1亿", l:"58万", c:"couple"},
+  {t:"开局觉醒神级系统", g:"系统逆袭", ep:"更新至 88 集", v:"1.9亿", l:"71万", c:"boy"},
+  {t:"夜半诡影", g:"悬疑惊悚", ep:"已完结", v:"4200万", l:"19万", c:"girl"},
+];
+
+function thumbHTML(reel){
+  const gr = GENRES[reel.g] || GENRES["古风仙侠"];
+  return `<div class="thumb" style="background:${gr.g}">
+    <div class="ht"></div>
+    <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:${gr.a};opacity:.25;filter:blur(30px)"></div>
+    ${charSVG(reel.c, gr.a)}
+  </div>`;
+}
+function reelHTML(reel, i){
+  const gr = GENRES[reel.g];
+  return `<div class="reel" onclick="openPlayer('${reel.t}','${reel.g}','${reel.c}')">
+    ${thumbHTML(reel)}
+    <span class="ep-badge">${reel.ep}</span>
+    <div class="veil"></div>
+    <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+    <div class="info">
+      <div class="title">《${reel.t}》</div>
+      <div class="meta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${reel.v}
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C1 8 3 4.5 7 4.5c2 0 3.5 1 5 2.5 1.5-1.5 3-2.5 5-2.5 4 0 6 3.5 4.5 7.5C19 16.5 12 21 12 21z"/></svg>${reel.l}
+      </div>
+    </div>
+  </div>`;
+}
+function renderReels(){
+  document.getElementById("homeReels").innerHTML = REELS.slice(0,6).map((r,i)=>reelHTML(r,i)).join("");
+  renderGallery("全部");
+}
+
+/* ================= 风格卡 ================= */
+const STYLES = [
+  {n:"国漫", en:"GUOMAN", g:"linear-gradient(150deg,#0ea5e9,#6366f1 60%,#1e1b4b)", c:"sword", a:"#93c5fd"},
+  {n:"日漫", en:"ANIME", g:"linear-gradient(150deg,#f472b6,#ec4899 55%,#7c2d6d)", c:"girl", a:"#fbcfe8"},
+  {n:"美漫", en:"COMIC", g:"linear-gradient(150deg,#f59e0b,#ef4444 60%,#7f1d1d)", c:"boy", a:"#fde68a"},
+  {n:"写实", en:"REAL", g:"linear-gradient(150deg,#a78bfa,#64748b 70%,#1e293b)", c:"couple", a:"#c4b5fd"},
+  {n:"水墨", en:"INK", g:"linear-gradient(150deg,#cbd5e1,#475569 60%,#0f172a)", c:"girl", a:"#e2e8f0"},
+  {n:"像素", en:"PIXEL", g:"linear-gradient(150deg,#34d399,#10b981 55%,#064e3b)", c:"sword", a:"#6ee7b7"},
+  {n:"3D 国风", en:"3D", g:"linear-gradient(150deg,#38bdf8,#8b5cf6 60%,#312e81)", c:"boy", a:"#a5b4fc"},
+  {n:"厚涂", en:"PAINT", g:"linear-gradient(150deg,#fb923c,#d946ef 60%,#701a75)", c:"girl", a:"#fbcfe8"},
+];
+function renderStyles(){
+  document.getElementById("styleList").innerHTML = STYLES.map(s=>`
+    <div class="style-card" onclick="switchView('studio')">
+      <div class="sc-bg" style="background:${s.g}"><div class="ht"></div>${charSVG(s.c, s.a)}</div>
+      <div class="sc-veil"></div>
+      <span class="sc-en">${s.en}</span>
+      <span class="sc-name">${s.n}</span>
+    </div>`).join("");
+  document.getElementById("styleChips").innerHTML = STYLES.map((s,i)=>`
+    <button class="chip ${i===0?'on':''}" onclick="pickChip(this)"><span class="swatch" style="background:${s.g}"></span>${s.n}</button>`).join("");
+  document.getElementById("bgmChips").innerHTML = ["国风管弦","热血电音","悬疑氛围","甜宠轻快","古琴悠远","史诗磅礴"].map((b,i)=>`
+    <button class="chip ${i===0?'on':''}" onclick="pickChip(this)">${b}</button>`).join("");
+}
+
+/* ================= 作品库 ================= */
+function renderGallery(filter){
+  const list = filter === "全部" ? REELS : REELS.filter(r=>r.g===filter);
+  document.getElementById("galleryGrid").innerHTML = list.map((r,i)=>reelHTML(r,i)).join("");
+}
+document.getElementById("gTabs").addEventListener("click",e=>{
+  const b = e.target.closest(".g-tab"); if(!b) return;
+  document.querySelectorAll(".g-tab").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  renderGallery(b.dataset.g);
+});
+
+/* ================= 视图切换 ================= */
+function switchView(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  document.querySelectorAll(".nav-links button").forEach(b=>b.classList.toggle("active", b.dataset.view===name));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function heroGenerate(){
+  switchView("studio");
+  const v = document.getElementById("heroInput").value.trim();
+  if(v) document.getElementById("scriptInput").value = v;
+  setTimeout(startGenerate, 600);
+}
+function fillHero(tag){
+  const map = {
+    "甜宠逆袭":"女主重生回到被退婚那天，未婚夫当众羞辱她。她冷笑撕毁婚书，转身嫁给残废王爷……",
+    "古风权谋":"她本是相府嫡女，却遭继妹陷害。一纸婚书嫁入东宫，从此步步为营，搅动朝堂风云……",
+    "都市玄幻":"外卖小哥意外觉醒龙神血脉，从此一路逆袭，吊打各路豪门，守护心爱之人……",
+    "悬疑惊悚":"深夜直播间收到一条诡异弹幕，主播照做后，恐怖的事一件接一件发生了……",
+    "系统修仙":"废柴少年绑定最强签到系统，开局签到处处是神级机缘，从此踏上无敌修仙路……"
+  };
+  document.getElementById("heroInput").value = map[tag] || "";
+}
+
+/* ================= 交互状态 ================= */
+function pickChip(el){
+  const parent = el.parentElement;
+  parent.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));
+  el.classList.add("on");
+}
+function pickVoice(el){
+  document.querySelectorAll(".voice").forEach(v=>v.classList.remove("on"));
+  el.classList.add("on");
+}
+document.getElementById("ratioSeg").addEventListener("click",e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#ratioSeg button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+});
+document.getElementById("epSeg").addEventListener("click",e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#epSeg button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+});
+
+/* ================= 生成模拟 ================= */
+const GEN_STEPS = ["解析剧本","生成分镜","生成角色","配音合成","渲染成片"];
+let genTimer = null;
+function startGenerate(){
+  const btn = document.getElementById("genBtn");
+  const ov = document.getElementById("genOverlay");
+  const bar = document.getElementById("genBar");
+  const pct = document.getElementById("genPct");
+  const step = document.getElementById("genStep");
+  document.getElementById("doneActions").classList.remove("show");
+  document.getElementById("pvActions").classList.remove("hide");
+  ov.classList.add("show");
+  btn.disabled = true; btn.textContent = "生成中…";
+  let p = 0, si = 0;
+  document.querySelectorAll("#genSteps span").forEach(s=>s.classList.remove("done","cur"));
+  function tick(){
+    if(p >= 100){
+      clearInterval(genTimer);
+      ov.classList.remove("show");
+      document.getElementById("doneActions").classList.add("show");
+      document.getElementById("pvActions").classList.add("hide");
+      btn.disabled = false; btn.innerHTML = '<span class="spark">⚡</span> 一键生成漫剧';
+      step.textContent = "生成完成！";
+      return;
+    }
+    p += Math.random()*7 + 3;
+    if(p > 100) p = 100;
+    const nsi = Math.min(4, Math.floor(p/20));
+    if(nsi !== si){
+      si = nsi;
+      document.querySelectorAll("#genSteps span").forEach((s,idx)=>{
+        s.classList.toggle("done", idx < si);
+        s.classList.toggle("cur", idx === si);
+      });
+    }
+    bar.style.width = p + "%";
+    pct.textContent = Math.floor(p) + "%";
+    step.textContent = "正在" + GEN_STEPS[si] + "…";
+  }
+  tick();
+  genTimer = setInterval(tick, 350);
+}
+
+/* ================= 播放器 ================= */
+let playTimer = null, curTime = 23;
+function openPlayer(title, genre, ch){
+  title = title || "重生之凤逆天下";
+  genre = genre || "古风仙侠";
+  ch = ch || "girl";
+  const gr = GENRES[genre];
+  document.getElementById("playerThumb").innerHTML = `<div style="position:absolute;inset:0;background:${gr.g}"><div class="ht"></div>${charSVG(ch, gr.a)}</div>`;
+  document.getElementById("playerModal").classList.add("show");
+  document.querySelector(".player-main .p-tt").textContent = "第 1 集 · " + title;
+  resetPlay();
+}
+function closePlayer(){
+  document.getElementById("playerModal").classList.remove("show");
+  pausePlay();
+}
+function togglePlay(btn){
+  const svg = btn.querySelector("svg");
+  if(playTimer){ pausePlay(); return; }
+  svg.innerHTML = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+  playTimer = setInterval(()=>{
+    curTime++;
+    if(curTime >= 60){ curTime = 0; pausePlay(); }
+    document.getElementById("timeTxt").textContent = fmt(curTime) + " / 01:00";
+    document.querySelector(".p-progress i").style.width = (curTime/60*100)+"%";
+    document.querySelector(".p-progress .knob").style.left = (curTime/60*100)+"%";
+  }, 1000);
+}
+function pausePlay(){
+  clearInterval(playTimer); playTimer = null;
+  const b = document.getElementById("playBtn");
+  b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+}
+function resetPlay(){
+  curTime = 23; pausePlay();
+  document.getElementById("timeTxt").textContent = fmt(curTime) + " / 01:00";
+  document.querySelector(".p-progress i").style.width = (curTime/60*100)+"%";
+  document.querySelector(".p-progress .knob").style.left = (curTime/60*100)+"%";
+}
+function fmt(s){ const m = Math.floor(s/60), ss = s%60; return (m<10?"0":"")+m+":"+(ss<10?"0":"")+ss; }
+
+/* ================= 分镜 & 预览初始化 ================= */
+function initPreview(){
+  const pv = document.getElementById("pvInner");
+  const gr = GENRES["古风仙侠"];
+  pv.innerHTML = `<div style="position:absolute;inset:0;background:${gr.g}"><div class="ht"></div>${charSVG("girl", gr.a)}</div>`;
+  for(let i=0;i<5;i++){
+    const f = document.getElementById("sb"+i);
+    const g2 = [GENRES["古风仙侠"],GENRES["穿越重生"],GENRES["玄幻修真"],GENRES["都市甜宠"],GENRES["古风仙侠"]][i];
+    const c2 = ["girl","girl","sword","couple","girl"][i];
+    f.innerHTML = `<div style="position:absolute;inset:0;background:${g2.g}">${charSVG(c2, g2.a)}</div><span class="f-n">${i+1}</span>`;
+  }
+  // 首页预览卡
+  const pc = [
+    [REELS[0],"girl"], [REELS[1],"couple"], [REELS[2],"sword"], [REELS[5],"girl"]
+  ];
+  for(let i=0;i<4;i++){
+    const gr3 = GENRES[pc[i][0].g];
+    document.getElementById("pc"+(i+1)).innerHTML = `<div style="position:absolute;inset:0;background:${gr3.g}"><div class="ht"></div>${charSVG(pc[i][1], gr3.a)}<div class="veil"></div><div class="info" style="position:absolute;left:12px;right:12px;bottom:12px;z-index:3"><div class="title" style="font-weight:800;font-size:13px">《${pc[i][0].t}》</div><div class="meta" style="display:flex;gap:8px;font-size:11px;color:var(--muted)">${pc[i][0].v} 播放</div></div></div>`;
+  }
+}
+
+/* 滚动渐显 */
+const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.style.opacity="1";e.target.style.transform="none";io.unobserve(e.target)}})},{threshold:.1});
+function watchReveal(){
+  document.querySelectorAll(".fcard,.style-card,.step,.reel,.quote,.stat,.plan").forEach(el=>{
+    el.style.opacity = "0"; el.style.transform = "translateY(24px)"; el.style.transition = "opacity .7s ease, transform .7s ease";
+    io.observe(el);
+  });
+}
+
+/* ================= 启动 ================= */
+renderStyles();
+renderReels();
+initPreview();
+watchReveal();
+</script>
+</body>
+</html>
