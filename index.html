@@ -1216,14 +1216,14 @@ const REELS = [
 ];
 
 const STYLES = [
-  {n:"国漫", en:"GUOMAN", g:"linear-gradient(150deg,#0ea5e9,#6366f1 60%,#1e1b4b)", c:"sword", a:"#93c5fd"},
-  {n:"日漫", en:"ANIME", g:"linear-gradient(150deg,#f472b6,#ec4899 55%,#7c2d6d)", c:"girl", a:"#fbcfe8"},
-  {n:"美漫", en:"COMIC", g:"linear-gradient(150deg,#f59e0b,#ef4444 60%,#7f1d1d)", c:"boy", a:"#fde68a"},
-  {n:"写实", en:"REAL", g:"linear-gradient(150deg,#a78bfa,#64748b 70%,#1e293b)", c:"couple", a:"#c4b5fd"},
-  {n:"水墨", en:"INK", g:"linear-gradient(150deg,#cbd5e1,#475569 60%,#0f172a)", c:"girl", a:"#e2e8f0"},
-  {n:"像素", en:"PIXEL", g:"linear-gradient(150deg,#34d399,#10b981 55%,#064e3b)", c:"sword", a:"#6ee7b7"},
-  {n:"3D 国风", en:"3D", g:"linear-gradient(150deg,#38bdf8,#8b5cf6 60%,#312e81)", c:"boy", a:"#a5b4fc"},
-  {n:"厚涂", en:"PAINT", g:"linear-gradient(150deg,#fb923c,#d946ef 60%,#701a75)", c:"girl", a:"#fbcfe8"},
+  {n:"国漫", en:"GUOMAN", img:"guoman", g:"linear-gradient(150deg,#0ea5e9,#6366f1 60%,#1e1b4b)"},
+  {n:"日漫", en:"ANIME", img:"anime", g:"linear-gradient(150deg,#f472b6,#ec4899 55%,#7c2d6d)"},
+  {n:"美漫", en:"COMIC", img:"comic", g:"linear-gradient(150deg,#f59e0b,#ef4444 60%,#7f1d1d)"},
+  {n:"写实", en:"REAL", img:"real", g:"linear-gradient(150deg,#a78bfa,#64748b 70%,#1e293b)"},
+  {n:"水墨", en:"INK", img:"ink", g:"linear-gradient(150deg,#cbd5e1,#475569 60%,#0f172a)"},
+  {n:"像素", en:"PIXEL", img:"pixel", g:"linear-gradient(150deg,#34d399,#10b981 55%,#064e3b)"},
+  {n:"3D 国风", en:"3D", img:"3d", g:"linear-gradient(150deg,#38bdf8,#8b5cf6 60%,#312e81)"},
+  {n:"厚涂", en:"PAINT", img:"paint", g:"linear-gradient(150deg,#fb923c,#d946ef 60%,#701a75)"},
 ];
 
 /* ================= 渲染工具 ================= */
@@ -1252,7 +1252,7 @@ function renderGallery(filter){
 function renderStyles(){
   document.getElementById("styleList").innerHTML = STYLES.map(s=>`
     <div class="style-card" onclick="switchView('studio')">
-      <div class="sc-bg" style="background:${s.g}"><div class="ht"></div></div>
+      <div class="sc-bg" style="background:${s.g}"><img src="images/styles/${s.img}.png" alt="${s.n}" onerror="this.style.display='none'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
       <div class="sc-veil"></div><span class="sc-en">${s.en}</span><span class="sc-name">${s.n}</span>
     </div>`).join("");
 }
