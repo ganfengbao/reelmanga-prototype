@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>漫剧工场 REELMANGA · 后台管理系统</title>
+<style>
+/* ============ 基础 ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a12; --bg-2:#0e0e1a; --bg-3:#12121f;
+  --card:rgba(255,255,255,.035); --card-2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.09); --border-2:rgba(255,255,255,.16);
+  --text:#f5f5fa; --muted:#9b9bb3; --dim:#6c6c85;
+  --violet:#8b5cf6; --fuchsia:#d946ef; --pink:#ec4899; --rose:#fb7185;
+  --orange:#fb923c; --amber:#fbbf24; --cyan:#22d3ee; --teal:#2dd4bf; --green:#4ade80; --red:#f87171;
+  --grad:linear-gradient(120deg,#8b5cf6 0%,#d946ef 45%,#fb7185 100%);
+  --grad-2:linear-gradient(120deg,#22d3ee,#8b5cf6 60%,#d946ef);
+  --shadow:0 20px 60px -20px rgba(0,0,0,.7);
+  --radius:18px;
+  --font:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-en:"Sora","Barlow","Avenir Next",var(--font);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+img{max-width:100%;display:block}
+::selection{background:rgba(217,70,239,.35)}
+::-webkit-scrollbar{width:9px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#d946ef);border-radius:99px}
+input,select,textarea{font-family:inherit}
+
+/* ============ 背景氛围 ============ */
+.bg-fx{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.bg-fx::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(1100px 700px at 80% -10%,rgba(139,92,246,.18),transparent 60%),
+  radial-gradient(900px 600px at -10% 20%,rgba(34,211,238,.10),transparent 60%),
+  radial-gradient(800px 700px at 50% 120%,rgba(217,70,239,.14),transparent 60%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.4;animation:drift 18s ease-in-out infinite alternate}
+.orb.o1{width:380px;height:380px;background:radial-gradient(circle,#8b5cf6,transparent 70%);top:-120px;left:6%}
+.orb.o2{width:320px;height:320px;background:radial-gradient(circle,#d946ef,transparent 70%);top:34%;right:-100px;animation-delay:-6s}
+.orb.o3{width:300px;height:300px;background:radial-gradient(circle,#22d3ee,transparent 70%);bottom:-120px;left:34%;animation-delay:-12s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(50px,-36px) scale(1.12)}}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.4;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 40%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 40%,transparent 100%)}
+
+/* ============ 布局骨架 ============ */
+.admin-shell{min-height:100vh;display:block}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;background:rgba(14,14,26,.86);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-right:1px solid var(--border);z-index:120;display:flex;flex-direction:column;transition:transform .3s ease}
+.main{margin-left:250px;min-height:100vh;display:flex;flex-direction:column}
+.sidebar-backdrop{display:none}
+
+/* ============ 侧边栏 ============ */
+.sb-head{height:70px;display:flex;align-items:center;gap:11px;padding:0 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-head .logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:16px;flex:1;min-width:0}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;box-shadow:0 8px 24px -8px rgba(217,70,239,.8);position:relative;overflow:hidden;flex-shrink:0}
+.logo-mark::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-100%);animation:sheen 3.5s ease infinite}
+@keyframes sheen{60%,100%{transform:translateX(100%)}}
+.logo-mark svg{width:16px;height:16px;fill:#fff;margin-left:1px}
+.sb-head .logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.sb-head .logo span{font-family:var(--font-en);font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:700;display:block}
+.sb-collapse{width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;font-size:13px;transition:.2s;flex-shrink:0}
+.sb-collapse:hover{color:var(--text);border-color:var(--border-2)}
+.sb-nav{flex:1;overflow-y:auto;padding:14px 12px}
+.sb-group{font-size:11px;color:var(--dim);letter-spacing:2px;font-weight:700;padding:14px 14px 8px}
+.side-nav-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;margin-bottom:3px;position:relative;border:1px solid transparent;white-space:nowrap}
+.side-nav-item:hover{color:var(--text);background:var(--card)}
+.side-nav-item.active{color:#fff;background:linear-gradient(120deg,rgba(139,92,246,.24),rgba(217,70,239,.14));border-color:rgba(217,70,239,.32)}
+.side-nav-item.active::before{content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:22px;border-radius:99px;background:var(--grad)}
+.side-nav-item .ic{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.side-nav-item .txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.side-nav-item .badge{font-family:var(--font-en);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;background:rgba(248,113,113,.16);border:1px solid rgba(248,113,113,.4);color:#fca5a5;flex-shrink:0}
+.side-nav-item .badge.gray{background:rgba(255,255,255,.07);border-color:var(--border);color:var(--muted)}
+.sb-foot{padding:14px;border-top:1px solid var(--border);flex-shrink:0}
+.sb-ver{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted)}
+.sb-ver .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease infinite}
+@keyframes pulse{50%{opacity:.4}}
+
+/* 折叠态（桌面） */
+.admin-shell.collapsed .sidebar{width:80px}
+.admin-shell.collapsed .main{margin-left:80px}
+.admin-shell.collapsed .sb-head .logo b,
+.admin-shell.collapsed .sb-head .logo span,
+.admin-shell.collapsed .side-nav-item .txt,
+.admin-shell.collapsed .side-nav-item .badge,
+.admin-shell.collapsed .sb-group,
+.admin-shell.collapsed .sb-ver .vtx{display:none}
+.admin-shell.collapsed .sb-head{justify-content:center;padding:0}
+.admin-shell.collapsed .side-nav-item{justify-content:center;padding:12px}
+.admin-shell.collapsed .side-nav-item.active::before{left:-13px}
+.admin-shell.collapsed .sb-ver{justify-content:center}
+
+/* ============ 顶栏 ============ */
+.topbar{position:sticky;top:0;z-index:110;height:70px;background:rgba(10,10,18,.7);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 26px}
+.tb-burger{display:none;width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--border);align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.tb-burger span{display:block;width:16px;height:2px;background:var(--text);border-radius:2px}
+.tb-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px}
+.tb-title small{font-family:var(--font-en);font-size:11px;letter-spacing:1px;color:var(--dim);font-weight:700}
+.tb-search{display:flex;align-items:center;gap:9px;padding:9px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);width:260px;margin-left:auto;transition:.2s}
+.tb-search:focus-within{border-color:rgba(217,70,239,.5)}
+.tb-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;flex:1;min-width:0}
+.tb-search svg{width:16px;height:16px;stroke:var(--dim);fill:none;stroke-width:2;flex-shrink:0}
+.tb-actions{display:flex;align-items:center;gap:10px}
+.tb-icon{position:relative;width:38px;height:38px;border-radius:11px;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;font-size:17px;transition:.2s}
+.tb-icon:hover{border-color:var(--border-2);transform:translateY(-1px)}
+.tb-icon .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--rose);box-shadow:0 0 8px var(--rose)}
+
+/* 通知下拉 */
+.notif-wrap{position:relative}
+.notif-drop{position:absolute;top:calc(100% + 10px);right:0;width:330px;background:var(--bg-2);border:1px solid var(--border-2);border-radius:16px;box-shadow:var(--shadow);display:none;z-index:130;overflow:hidden}
+.notif-drop.show{display:block;animation:viewIn .2s ease}
+.notif-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:800}
+.notif-head button{font-size:12px;color:var(--cyan);font-weight:700}
+.notif-list{max-height:330px;overflow-y:auto}
+.notif-item{display:flex;gap:11px;padding:12px 16px;border-bottom:1px solid var(--border);transition:.15s;cursor:pointer}
+.notif-item:hover{background:var(--card)}
+.notif-item:last-child{border-bottom:none}
+.notif-item .n-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;background:var(--card-2);flex-shrink:0}
+.notif-item .n-body{flex:1;min-width:0}
+.notif-item .n-text{font-size:13px;color:#d5d5e8;line-height:1.5}
+.notif-item .n-time{font-size:11px;color:var(--dim);margin-top:2px}
+.notif-item .n-unread{width:7px;height:7px;border-radius:50%;background:var(--fuchsia);margin-top:6px;flex-shrink:0}
+.notif-foot{padding:11px;text-align:center;border-top:1px solid var(--border)}
+.notif-foot a{font-size:12.5px;color:var(--muted);font-weight:700}
+.notif-foot a:hover{color:var(--text)}
+
+/* 管理员菜单 */
+.admin-menu{position:relative}
+.admin-chip{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border-radius:99px;background:var(--card);border:1px solid var(--border);transition:.2s}
+.admin-chip:hover{border-color:var(--border-2)}
+.u-avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.admin-chip .u-name{font-size:13px;font-weight:700;display:none}
+.admin-chip .u-caret{font-size:10px;color:var(--muted)}
+@media(min-width:1380px){.admin-chip .u-name{display:block}}
+.u-drop{position:absolute;top:calc(100% + 10px);right:0;width:220px;background:var(--bg-2);border:1px solid var(--border-2);border-radius:16px;padding:8px;box-shadow:var(--shadow);display:none;z-index:130}
+.u-drop.show{display:block;animation:viewIn .2s ease}
+.u-drop-head{display:flex;align-items:center;gap:11px;padding:10px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.u-drop-head .u-avatar{width:40px;height:40px;font-size:17px}
+.u-drop-head b{display:block;font-size:14px}
+.u-drop-head span{font-size:12px;color:var(--dim)}
+.u-drop a{display:block;padding:10px 12px;border-radius:10px;font-size:13.5px;color:var(--muted);transition:.15s;cursor:pointer}
+.u-drop a:hover{color:var(--text);background:var(--card-2)}
+.u-drop .u-logout{color:var(--rose)}
+
+/* ============ 内容区 ============ */
+.content{padding:26px 28px 60px;flex:1}
+.sec{display:none;animation:viewIn .4s ease}
+.sec.active{display:block}
+@keyframes viewIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:22px}
+.page-head h1{font-size:24px;font-weight:900}
+.page-head p{color:var(--muted);margin-top:4px;font-size:13.5px}
+.page-head .head-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ============ 按钮 ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:700;border-radius:11px;transition:.22s;white-space:nowrap;font-size:13.5px}
+.btn-ghost{padding:8px 16px;color:var(--text);border:1px solid var(--border);background:var(--card)}
+.btn-ghost:hover{border-color:var(--border-2);background:var(--card-2);transform:translateY(-1px)}
+.btn-grad{padding:9px 18px;background:var(--grad);color:#fff;box-shadow:0 10px 26px -10px rgba(217,70,239,.9);position:relative;overflow:hidden}
+.btn-grad:hover{transform:translateY(-1px);box-shadow:0 14px 34px -10px rgba(217,70,239,.95)}
+.btn-grad::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-100%);transition:.6s}
+.btn-grad:hover::after{transform:translateX(100%)}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:9px}
+.btn-danger{color:#fca5a5;border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.08)}
+.btn-danger:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.5)}
+
+/* ============ 卡片 ============ */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.panel h3{font-size:15px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.panel h3 .ic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(217,70,239,.2));display:grid;place-items:center;border:1px solid rgba(217,70,239,.3);font-size:15px}
+.panel .sub{font-size:12.5px;color:var(--dim);margin:-8px 0 14px}
+.panel .h-right{margin-left:auto;font-weight:600;font-size:12.5px}
+
+/* ============ 统计卡片 ============ */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat-card{position:relative;padding:20px;border-radius:16px;background:var(--card);border:1px solid var(--border);overflow:hidden;transition:.25s}
+.stat-card:hover{transform:translateY(-3px);border-color:var(--border-2)}
+.stat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);opacity:.8}
+.stat-card .s-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stat-card .s-lab{font-size:13px;color:var(--muted);font-weight:600}
+.stat-card .s-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(217,70,239,.14));border:1px solid rgba(217,70,239,.28)}
+.stat-card .s-val{font-family:var(--font-en);font-size:28px;font-weight:900;line-height:1.1}
+.stat-card .s-val small{font-size:14px;color:var(--muted);font-weight:600}
+.stat-card .s-trend{font-size:12.5px;margin-top:8px;font-weight:700}
+.stat-card .s-trend.up{color:var(--green)}
+.stat-card .s-trend.down{color:var(--red)}
+.stat-card .s-trend.flat{color:var(--muted)}
+
+/* ============ 数据网格 ============ */
+.dash-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:20px}
+.dash-grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:20px}
+.dash-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+
+/* ============ 图表 ============ */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.chart-card h3{font-size:15px;font-weight:800;margin-bottom:4px}
+.chart-card .sub{font-size:12.5px;color:var(--dim);margin-bottom:16px}
+.chart-svg{width:100%;height:auto;display:block}
+.chart-legend{display:flex;gap:18px;margin-top:12px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.chart-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+
+/* 收益进度条 */
+.rev-bar{margin-bottom:15px}
+.rev-bar:last-child{margin-bottom:0}
+.rev-bar .rb-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.rev-bar .rb-top b{font-family:var(--font-en);color:var(--text)}
+.rev-bar .rb-track{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.rev-bar .rb-fill{height:100%;border-radius:99px;background:var(--grad);transition:width .6s ease}
+
+/* ============ 列表 / 待办 ============ */
+.list-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.list-row:last-child{border-bottom:none}
+.list-row .lr-ava{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.list-row .lr-body{flex:1;min-width:0}
+.list-row .lr-title{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-row .lr-sub{font-size:11.5px;color:var(--dim)}
+.list-row .lr-right{text-align:right;flex-shrink:0}
+.list-row .lr-val{font-family:var(--font-en);font-size:13px;font-weight:800}
+.list-row .lr-time{font-size:11px;color:var(--dim)}
+
+.todo-item{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-bottom:1px solid var(--border)}
+.todo-item:last-child{border-bottom:none}
+.todo-item .td-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;flex-shrink:0;background:var(--card-2);border:1px solid var(--border)}
+.todo-item .td-body{flex:1;min-width:0}
+.todo-item .td-title{font-size:13px;font-weight:700}
+.todo-item .td-sub{font-size:11.5px;color:var(--dim);margin-top:2px}
+.todo-item .td-num{font-family:var(--font-en);font-size:12px;font-weight:800;color:var(--fuchsia);flex-shrink:0;margin-top:3px}
+
+.sys-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border)}
+.sys-item:last-child{border-bottom:none}
+.sys-item .sy-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sys-item .sy-dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
+.sys-item .sy-dot.warn{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.sys-item .sy-dot.down{background:var(--red);box-shadow:0 0 8px var(--red)}
+.sys-item .sy-name{font-size:13px;font-weight:700;flex:1}
+.sys-item .sy-val{font-family:var(--font-en);font-size:12px;color:var(--muted)}
+
+/* ============ 工具条 ============ */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar .search{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:11px;background:var(--card);border:1px solid var(--border);min-width:220px;flex:1;max-width:320px}
+.toolbar .search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;flex:1;min-width:0}
+.toolbar .search svg{width:15px;height:15px;stroke:var(--dim);fill:none;stroke-width:2;flex-shrink:0}
+.filter{position:relative}
+.filter select{height:38px;background:var(--card);border:1px solid var(--border);border-radius:11px;color:var(--text);padding:0 12px;font-size:13px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 14px) 16px,calc(100% - 10px) 16px;background-size:4px 4px;background-repeat:no-repeat}
+.filter select option{background:var(--bg-2)}
+.toolbar .spacer{flex:1}
+
+/* ============ 表格 ============ */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-scroll{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+.data-table th{text-align:left;color:var(--dim);font-weight:700;font-size:12px;padding:13px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap}
+.data-table td{padding:12px 16px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
+.data-table tbody tr{transition:.15s}
+.data-table tbody tr:hover{background:var(--card-2)}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table .cell-user{display:flex;align-items:center;gap:10px}
+.data-table .cell-user .u-avatar{width:32px;height:32px;font-size:13px}
+.data-table .cell-user .cu-name{font-weight:700;font-size:13px}
+.data-table .cell-user .cu-sub{font-size:11px;color:var(--dim)}
+.data-table .cell-title{font-weight:700;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.data-table .cell-muted{color:var(--muted)}
+.data-table .cell-dim{color:var(--dim)}
+.data-table .cell-mono{font-family:var(--font-en);font-size:12px}
+.data-table .cell-actions{display:flex;gap:6px;flex-wrap:wrap}
+.data-table .empty{text-align:center;color:var(--dim);padding:44px 0!important}
+.data-table .ck{width:15px;height:15px;accent-color:var(--fuchsia);cursor:pointer}
+
+/* 标签 / 状态 */
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
+.tag.gray{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+.tag.blue{background:rgba(34,211,238,.12);color:#7dd3fc;border:1px solid rgba(34,211,238,.35)}
+.tag.green{background:rgba(74,222,128,.13);color:#86efac;border:1px solid rgba(74,222,128,.4)}
+.tag.amber{background:rgba(251,191,36,.13);color:#fde68a;border:1px solid rgba(251,191,36,.4)}
+.tag.pink{background:rgba(217,70,239,.13);color:#f0abfc;border:1px solid rgba(217,70,239,.4)}
+.tag.red{background:rgba(248,113,113,.14);color:#fca5a5;border:1px solid rgba(248,113,113,.4)}
+.tag.violet{background:rgba(139,92,246,.14);color:#c4b5fd;border:1px solid rgba(139,92,246,.4)}
+
+/* 作品缩略图 */
+.work-thumb{width:40px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;position:relative;border:1px solid var(--border)}
+.work-thumb .wt-inner{position:absolute;inset:0;display:grid;place-items:center;font-size:15px}
+.cell-work{display:flex;align-items:center;gap:12px}
+
+/* ============ 分页 ============ */
+.pager{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:14px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
+.pager-info{font-size:12.5px;color:var(--dim);margin-right:auto}
+.pg-btn{min-width:30px;height:30px;padding:0 8px;border-radius:9px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:700;transition:.15s}
+.pg-btn:hover:not(:disabled){color:var(--text);border-color:var(--border-2)}
+.pg-btn.on{color:#fff;background:var(--grad);border-color:transparent}
+.pg-btn:disabled{opacity:.35;cursor:not-allowed}
+.pg-dots{color:var(--dim);padding:0 2px}
+
+/* ============ 弹窗 ============ */
+.modal{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(4,4,10,.82);backdrop-filter:blur(14px)}
+.modal.show{display:flex;animation:viewIn .3s ease}
+.modal-card{width:100%;max-width:480px;border-radius:20px;background:var(--bg-2);border:1px solid var(--border-2);padding:26px;position:relative;box-shadow:var(--shadow);max-height:calc(100vh - 48px);overflow-y:auto}
+.modal-card.wide{max-width:640px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-head h3{font-size:17px;font-weight:800}
+.modal-close{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--card-2);color:var(--muted);font-size:14px;transition:.2s}
+.modal-close:hover{color:var(--text)}
+.m-field{margin-bottom:16px}
+.m-field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.m-field label .req{color:var(--rose)}
+.m-field input,.m-field select,.m-field textarea{width:100%;height:44px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:11px;color:var(--text);padding:0 13px;font-size:14px;outline:none;transition:.2s}
+.m-field textarea{height:auto;min-height:88px;padding:11px 13px;resize:vertical;line-height:1.7}
+.m-field input:focus,.m-field select:focus,.m-field textarea:focus{border-color:rgba(217,70,239,.5);box-shadow:0 0 0 3px rgba(217,70,239,.12)}
+.m-field select option{background:var(--bg-2)}
+.m-field .hint{font-size:11.5px;color:var(--dim);margin-top:6px}
+.m-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.m-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.m-actions .btn{min-width:96px;padding:11px 20px}
+
+/* 确认弹窗 */
+.confirm-icon{width:60px;height:60px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;font-size:26px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35)}
+.confirm-icon.info{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.35)}
+.confirm-text{text-align:center}
+.confirm-text h3{font-size:16px;font-weight:800;margin-bottom:8px}
+.confirm-text p{font-size:13.5px;color:var(--muted);line-height:1.7}
+
+/* 权限矩阵 */
+.perm-group{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.perm-group .pg-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.03);font-size:13.5px;font-weight:800;cursor:pointer;user-select:none}
+.perm-group .pg-head .pg-ic{font-size:15px}
+.perm-group .pg-head .pg-all{margin-left:auto}
+.perm-group .pg-body{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-top:1px solid var(--border)}
+.perm-chip{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;background:var(--card-2);border:1px solid var(--border);font-size:12.5px;color:var(--muted);cursor:pointer;transition:.15s;user-select:none}
+.perm-chip:hover{color:var(--text);border-color:var(--border-2)}
+.perm-chip input{accent-color:var(--fuchsia);width:14px;height:14px;cursor:pointer}
+.perm-chip.on{color:#fff;background:linear-gradient(120deg,rgba(139,92,246,.85),rgba(217,70,239,.85));border-color:transparent}
+
+/* 分段选择器 */
+.seg{display:inline-flex;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px}
+.seg button{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);transition:.2s;white-space:nowrap}
+.seg button.on{background:var(--card-2);color:var(--text);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+
+/* 开关 */
+.switch{position:relative;width:46px;height:26px;border-radius:99px;background:var(--card-2);border:1px solid var(--border);cursor:pointer;transition:.3s;flex-shrink:0}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.3s}
+.switch.on{background:rgba(217,70,239,.3);border-color:rgba(217,70,239,.5)}
+.switch.on::after{left:22px;background:var(--grad)}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:none}
+.set-row .st-body{flex:1}
+.set-row .st-name{font-size:13.5px;font-weight:700}
+.set-row .st-desc{font-size:12px;color:var(--dim);margin-top:2px}
+
+/* ============ 登录屏 ============ */
+.login-screen{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);transition:opacity .4s ease, visibility .4s}
+.login-screen.hide{opacity:0;visibility:hidden;pointer-events:none}
+.login-box{width:100%;max-width:400px;border-radius:24px;background:var(--bg-2);border:1px solid var(--border-2);padding:34px;position:relative;box-shadow:var(--shadow)}
+.login-logo{display:flex;align-items:center;gap:11px;justify-content:center;margin-bottom:8px}
+.login-logo b{font-size:20px;font-weight:900;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:26px}
+.login-sub b{color:var(--fuchsia)}
+.login-hint{display:flex;align-items:center;gap:8px;margin-top:18px;padding:11px 14px;border-radius:11px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);font-size:12.5px;color:#7dd3fc}
+
+/* ============ toast ============ */
+#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);z-index:500;background:rgba(18,18,31,.94);backdrop-filter:blur(12px);border:1px solid var(--border-2);color:var(--text);padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 工具类 */
+.muted{color:var(--muted)}
+.hide{display:none!important}
+.mt16{margin-top:16px}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:var(--cyan);animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============ 响应式 ============ */
+@media(max-width:1380px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-grid-3{grid-template-columns:1fr}
+}
+@media(max-width:1180px){
+  .dash-grid,.dash-grid-2{grid-template-columns:1fr}
+}
+@media(max-width:1080px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:none}
+  .main{margin-left:0}
+  .sidebar-backdrop{display:none;position:fixed;inset:0;z-index:115;background:rgba(4,4,10,.6);backdrop-filter:blur(4px)}
+  .sidebar-backdrop.show{display:block}
+  .tb-burger{display:flex}
+  .content{padding:20px 16px 60px}
+  .topbar{padding:0 16px}
+}
+@media(max-width:640px){
+  .stat-grid{grid-template-columns:1fr}
+  .tb-search{display:none}
+  .m-row{grid-template-columns:1fr}
+  .page-head h1{font-size:20px}
+  .data-table{min-width:560px}
+  .pager{justify-content:center}
+  .pager-info{width:100%;text-align:center;margin-bottom:4px}
+}
+</style>
+</head>
+<body>
+<div class="bg-fx"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
+<div class="grid-overlay"></div>
+
+<!-- ============ 登录屏 ============ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+      <b>漫剧工场</b>
+    </div>
+    <div class="login-sub">REELMANGA <b>· 后台管理系统</b></div>
+    <div class="m-field"><label>管理员账号</label><input id="loginAccount" value="admin" placeholder="请输入管理员账号" /></div>
+    <div class="m-field"><label>密码</label><input id="loginPass" type="password" value="123456" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doAdminLogin()" /></div>
+    <button class="btn btn-grad" style="width:100%;padding:13px;font-size:15px" onclick="doAdminLogin()">🔐 登 录</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="skipLogin()">以演示身份直接进入 →</button>
+    <div class="login-hint">💡 演示账号 admin / 123456（任意账号密码亦可直接进入）</div>
+    <a href="index.html" style="display:block;text-align:center;margin-top:14px;color:var(--muted);font-size:13px">← 返回前台首页</a>
+  </div>
+</div>
+
+<!-- ============ 侧边栏 ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+      <div><b>漫剧工场</b><span>ADMIN CONSOLE</span></div>
+    </div>
+    <button class="sb-collapse" onclick="toggleSidebar()" title="折叠/展开">⟨</button>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-group">总览</div>
+    <div class="side-nav-item active" data-sec="dashboard" onclick="switchSec('dashboard')"><span class="ic">📊</span><span class="txt">仪表盘</span></div>
+    <div class="side-nav-item" data-sec="analytics" onclick="switchSec('analytics')"><span class="ic">📈</span><span class="txt">数据统计</span></div>
+
+    <div class="sb-group">业务管理</div>
+    <div class="side-nav-item" data-sec="users" onclick="switchSec('users')"><span class="ic">👥</span><span class="txt">用户管理</span></div>
+    <div class="side-nav-item" data-sec="works" onclick="switchSec('works')"><span class="ic">🎬</span><span class="txt">作品管理</span><span class="badge" id="workPendingBadge">3</span></div>
+    <div class="side-nav-item" data-sec="comments" onclick="switchSec('comments')"><span class="ic">💬</span><span class="txt">评论管理</span><span class="badge" id="commentPendingBadge">2</span></div>
+    <div class="side-nav-item" data-sec="orders" onclick="switchSec('orders')"><span class="ic">💰</span><span class="txt">订单管理</span></div>
+    <div class="side-nav-item" data-sec="models" onclick="switchSec('models')"><span class="ic">🔌</span><span class="txt">模型服务</span></div>
+
+    <div class="sb-group">系统</div>
+    <div class="side-nav-item" data-sec="roles" onclick="switchSec('roles')"><span class="ic">🛡️</span><span class="txt">角色权限</span></div>
+    <div class="side-nav-item" data-sec="settings" onclick="switchSec('settings')"><span class="ic">⚙️</span><span class="txt">系统设置</span></div>
+    <div class="side-nav-item" data-sec="logs" onclick="switchSec('logs')"><span class="ic">📜</span><span class="txt">操作日志</span></div>
+  </div>
+  <div class="sb-foot">
+    <a href="index.html" style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:12px;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.3);color:var(--rose);font-size:13px;font-weight:700;margin-bottom:10px">← 返回前台首页</a>
+    <div class="sb-ver"><span class="dot"></span><span class="vtx">系统运行正常 · v4.2.0</span></div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebarMobile()"></div>
+
+<!-- ============ 主区域 ============ -->
+<div class="main" id="main">
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <button class="tb-burger" id="tbBurger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+    <div class="tb-title"><span id="pageTitle">仪表盘</span><small id="pageCrumb">/ 工作台总览</small></div>
+    <div class="tb-search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="globalSearch" placeholder="全局搜索：用户 / 作品…" onkeydown="globalSearch(event)" />
+    </div>
+    <div class="tb-actions">
+      <div class="notif-wrap">
+        <button class="tb-icon" onclick="toggleNotif(event)">🔔<span class="dot" id="notifDot"></span></button>
+        <div class="notif-drop" id="notifDrop">
+          <div class="notif-head">🔔 通知 <button onclick="markAllRead()">全部已读</button></div>
+          <div class="notif-list" id="notifList"></div>
+          <div class="notif-foot"><a href="#" onclick="switchSec('works');closeNotif();return false;">查看待审核作品 →</a></div>
+        </div>
+      </div>
+      <div class="admin-menu">
+        <button class="admin-chip" onclick="toggleAdminMenu(event)">
+          <span class="u-avatar">管</span>
+          <span class="u-name">系统管理员</span>
+          <span class="u-caret">▾</span>
+        </button>
+        <div class="u-drop" id="adminDrop">
+          <div class="u-drop-head"><span class="u-avatar">管</span><div><b>系统管理员</b><span>超级管理员 · admin</span></div></div>
+          <a onclick="switchSec('settings');closeAdminMenu();">⚙️ 系统设置</a>
+          <a onclick="switchSec('roles');closeAdminMenu();">🛡️ 角色权限</a>
+          <a onclick="toast('原型演示：个人资料编辑');closeAdminMenu();">👤 个人资料</a>
+          <a href="index.html">🌐 返回前台首页</a>
+          <a class="u-logout" onclick="adminLogout()">🚪 退出登录</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- ============ 仪表盘 ============ -->
+    <section class="sec active" id="sec-dashboard">
+      <div class="page-head">
+        <div><h1>仪表盘</h1><p>欢迎回来，管理员。今天是 2025 年 6 月 18 日 · 平台运行正常。</p></div>
+        <div class="head-actions">
+          <button class="btn btn-ghost" onclick="toast('已导出今日运营简报 ✓')">⬇ 导出报表</button>
+          <button class="btn btn-grad" onclick="switchSec('users')">＋ 新增用户</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="s-top"><span class="s-lab">注册用户总数</span><span class="s-ic">👥</span></div><div class="s-val">128,436</div><div class="s-trend up">▲ 3.2% 较上周 · 今日 +1,206</div></div>
+        <div class="stat-card"><div class="s-top"><span class="s-lab">创作者数量</span><span class="s-ic">✍️</span></div><div class="s-val">32,180</div><div class="s-trend up">▲ 5.1% 较上周 · 今日 +312</div></div>
+        <div class="stat-card"><div class="s-top"><span class="s-lab">作品总数</span><span class="s-ic">🎬</span></div><div class="s-val">86,432</div><div class="s-trend up">▲ 12.4% 较上周 · 今日 +2,480</div></div>
+        <div class="stat-card"><div class="s-top"><span class="s-lab">今日收益</span><span class="s-ic">💰</span></div><div class="s-val">¥128,650</div><div class="s-trend up">▲ 8.1% 较昨日</div></div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="chart-card">
+          <h3>用户增长趋势</h3>
+          <div class="sub">近 30 天注册用户数与活跃创作者（人）</div>
+          <svg class="chart-svg" viewBox="0 0 640 230" preserveAspectRatio="none" style="height:220px">
+            <defs>
+              <linearGradient id="uArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".32"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient>
+              <linearGradient id="uLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#d946ef"/></linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,.06)" stroke-width="1">
+              <line x1="0" y1="46" x2="640" y2="46"/><line x1="0" y1="92" x2="640" y2="92"/><line x1="0" y1="138" x2="640" y2="138"/><line x1="0" y1="184" x2="640" y2="184"/>
+            </g>
+            <path d="M0,175 L45,165 L90,150 L135,155 L180,138 L225,120 L270,126 L315,105 L360,92 L405,80 L450,70 L495,58 L540,44 L585,34 L640,26 L640,230 L0,230 Z" fill="url(#uArea)"/>
+            <path d="M0,175 L45,165 L90,150 L135,155 L180,138 L225,120 L270,126 L315,105 L360,92 L405,80 L450,70 L495,58 L540,44 L585,34 L640,26" fill="none" stroke="url(#uLine)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="chart-legend"><span><i style="background:var(--violet)"></i>新增注册</span><span><i style="background:var(--cyan)"></i>活跃创作者</span><span style="margin-left:auto">6 月 1 日 → 6 月 30 日</span></div>
+        </div>
+        <div class="chart-card">
+          <h3>收益构成</h3>
+          <div class="sub">本月累计 ¥486.2 万</div>
+          <div class="rev-bar"><div class="rb-top"><span>广告分成</span><b>62% · ¥301.4万</b></div><div class="rb-track"><div class="rb-fill" style="width:62%"></div></div></div>
+          <div class="rev-bar"><div class="rb-top"><span>付费解锁</span><b>28% · ¥136.1万</b></div><div class="rb-track"><div class="rb-fill" style="width:28%;background:linear-gradient(120deg,#22d3ee,#8b5cf6)"></div></div></div>
+          <div class="rev-bar"><div class="rb-top"><span>打赏礼物</span><b>7% · ¥34.0万</b></div><div class="rb-track"><div class="rb-fill" style="width:7%;background:linear-gradient(120deg,#4ade80,#22d3ee)"></div></div></div>
+          <div class="rev-bar"><div class="rb-top"><span>会员订阅</span><b>3% · ¥14.7万</b></div><div class="rb-track"><div class="rb-fill" style="width:3%;background:linear-gradient(120deg,#fb923c,#fbbf24)"></div></div></div>
+        </div>
+      </div>
+
+      <div class="dash-grid-3">
+        <div class="panel">
+          <h3><span class="ic">⏳</span>待办事项 <span class="tag red h-right">5 项待处理</span></h3>
+          <div id="dashTodo"></div>
+        </div>
+        <div class="panel">
+          <h3><span class="ic">🕑</span>最新注册用户 <span class="h-right muted" style="cursor:pointer" onclick="switchSec('users')">查看全部 →</span></h3>
+          <div id="dashNewUsers"></div>
+        </div>
+        <div class="panel">
+          <h3><span class="ic">🖥️</span>系统服务状态 <span class="tag green h-right">全部正常</span></h3>
+          <div id="dashSys"></div>
+        </div>
+      </div>
+
+      <div class="dash-grid-2">
+        <div class="panel">
+          <h3><span class="ic">💰</span>最新订单 <span class="h-right muted" style="cursor:pointer" onclick="switchSec('orders')">查看全部 →</span></h3>
+          <div class="table-scroll">
+            <table class="data-table" style="min-width:520px">
+              <thead><tr><th>订单号</th><th>用户</th><th>方案</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
+              <tbody id="dashOrders"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <h3><span class="ic">🏷️</span>作品分类分布 <span class="h-right muted">共 86,432 部</span></h3>
+          <div id="dashGenre"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 用户管理 ============ -->
+    <section class="sec" id="sec-users">
+      <div class="page-head">
+        <div><h1>用户管理</h1><p>管理平台全部注册用户与创作者账号。</p></div>
+        <div class="head-actions"><button class="btn btn-grad" onclick="openUserModal()">＋ 新增用户</button></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="搜索昵称 / 手机号…" oninput="FILTER.users.q=this.value;renderUsers()" /></div>
+        <div class="filter"><select onchange="FILTER.users.level=this.value;renderUsers()"><option value="全部">全部等级</option><option value="普通用户">普通用户</option><option value="创作者">创作者</option><option value="Pro 会员">Pro 会员</option><option value="工作室">工作室</option></select></div>
+        <div class="filter"><select onchange="FILTER.users.status=this.value;renderUsers()"><option value="全部">全部状态</option><option value="正常">正常</option><option value="封禁">封禁</option></select></div>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-sm" onclick="toast('用户数据已导出 ✓')">⬇ 导出</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th style="width:34px"><input type="checkbox" class="ck" onclick="checkAll(this,'userCk')" /></th><th>用户</th><th>等级</th><th>作品数</th><th>消费金额</th><th>注册时间</th><th>最近登录</th><th>状态</th><th style="text-align:right">操作</th></tr></thead>
+            <tbody id="userTbody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="userPager"></div>
+      </div>
+    </section>
+
+    <!-- ============ 作品管理 ============ -->
+    <section class="sec" id="sec-works">
+      <div class="page-head">
+        <div><h1>作品管理</h1><p>审核、上下架与下架违规漫剧内容。</p></div>
+        <div class="head-actions"><button class="btn btn-ghost" onclick="toast('原型演示：批量导入')">📥 批量导入</button></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="搜索作品名 / 作者…" oninput="FILTER.works.q=this.value;renderWorks()" /></div>
+        <div class="filter"><select onchange="FILTER.works.status=this.value;renderWorks()"><option value="全部">全部状态</option><option value="审核中">审核中</option><option value="已上架">已上架</option><option value="已下架">已下架</option><option value="违规下架">违规下架</option></select></div>
+        <div class="filter"><select onchange="FILTER.works.genre=this.value;renderWorks()"><option value="全部">全部分类</option><option value="古风仙侠">古风仙侠</option><option value="都市甜宠">都市甜宠</option><option value="玄幻修真">玄幻修真</option><option value="系统逆袭">系统逆袭</option><option value="悬疑惊悚">悬疑惊悚</option><option value="穿越重生">穿越重生</option><option value="豪门商战">豪门商战</option></select></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th style="width:34px"><input type="checkbox" class="ck" onclick="checkAll(this,'workCk')" /></th><th>作品</th><th>分类</th><th>作者</th><th>集数</th><th>播放量</th><th>提交时间</th><th>状态</th><th style="text-align:right">操作</th></tr></thead>
+            <tbody id="workTbody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="workPager"></div>
+      </div>
+    </section>
+
+    <!-- ============ 评论管理 ============ -->
+    <section class="sec" id="sec-comments">
+      <div class="page-head">
+        <div><h1>评论管理</h1><p>审核与清理用户评论，维护社区氛围。</p></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="搜索评论内容 / 用户…" oninput="FILTER.comments.q=this.value;renderComments()" /></div>
+        <div class="filter"><select onchange="FILTER.comments.status=this.value;renderComments()"><option value="全部">全部状态</option><option value="待审核">待审核</option><option value="正常">正常</option><option value="已删除">已删除</option></select></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>用户</th><th>评论内容</th><th>关联作品</th><th>时间</th><th>状态</th><th style="text-align:right">操作</th></tr></thead>
+            <tbody id="commentTbody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="commentPager"></div>
+      </div>
+    </section>
+
+    <!-- ============ 订单管理 ============ -->
+    <section class="sec" id="sec-orders">
+      <div class="page-head">
+        <div><h1>订单管理</h1><p>追踪付费订阅与打赏订单，处理退款。</p></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="搜索订单号 / 用户…" oninput="FILTER.orders.q=this.value;renderOrders()" /></div>
+        <div class="filter"><select onchange="FILTER.orders.status=this.value;renderOrders()"><option value="全部">全部状态</option><option value="已支付">已支付</option><option value="待支付">待支付</option><option value="已退款">已退款</option></select></div>
+        <div class="filter"><select onchange="FILTER.orders.plan=this.value;renderOrders()"><option value="全部">全部方案</option><option value="创作者 Pro">创作者 Pro</option><option value="工作室 Studio">工作室 Studio</option><option value="打赏">打赏</option></select></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>订单号</th><th>用户</th><th>方案</th><th>金额</th><th>支付方式</th><th>下单时间</th><th>状态</th><th style="text-align:right">操作</th></tr></thead>
+            <tbody id="orderTbody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="orderPager"></div>
+      </div>
+    </section>
+
+    <!-- ============ 模型服务 ============ -->
+    <section class="sec" id="sec-models">
+      <div class="page-head">
+        <div><h1>模型服务</h1><p>管理平台级 AI 供应商与能力路由，密钥仅存于服务端加密存储。</p></div>
+        <div class="head-actions"><button class="btn btn-grad" onclick="openProviderModal()">＋ 添加供应商</button></div>
+      </div>
+      <div class="panel" style="margin-bottom:16px">
+        <h3><span class="ic">🔀</span>能力路由 · 绑定到创作流水线各阶段</h3>
+        <div class="sub">管理员可为全站设置默认能力供应商，用户侧可覆盖个人配置。</div>
+        <div class="route-grid" id="routeList"></div>
+      </div>
+      <div class="panel">
+        <h3><span class="ic">🔌</span>供应商列表</h3>
+        <div class="sub">支持官方 / 中转站 / OpenAI 兼容协议。</div>
+        <div class="pv-grid" id="providerList"></div>
+      </div>
+    </section>
+
+    <!-- ============ 数据统计 ============ -->
+    <section class="sec" id="sec-analytics">
+      <div class="page-head">
+        <div><h1>数据统计</h1><p>平台级运营数据与变现概览。</p></div>
+        <div class="seg" id="rangeSeg"><button class="on" onclick="setRange(this,'7d')">近 7 天</button><button onclick="setRange(this,'30d')">近 30 天</button><button onclick="setRange(this,'all')">全部</button></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="s-top"><span class="s-lab">累计播放量</span><span class="s-ic">👁️</span></div><div class="s-val" id="anPlays">21.4<small>亿</small></div><div class="s-trend up" id="anPlaysT">▲ 12.4%</div></div>
+        <div class="stat-card"><div class="s-top"><span class="s-lab">累计收益</span><span class="s-ic">💰</span></div><div class="s-val" id="anEarn">¥486<small>万</small></div><div class="s-trend up" id="anEarnT">▲ 8.1%</div></div>
+        <div class="stat-card"><div class="s-top"><span class="s-lab">付费转化率</span><span class="s-ic">📈</span></div><div class="s-val" id="anConv">6.8<small>%</small></div><div class="s-trend up" id="anConvT">▲ 0.6%</div></div>
+        <div class="stat-card"><div class="s-top"><span class="s-lab">平均完播率</span><span class="s-ic">⏱️</span></div><div class="s-val" id="anFin">68<small>%</small></div><div class="s-trend up" id="anFinT">▲ 2.6%</div></div>
+      </div>
+      <div class="dash-grid">
+        <div class="chart-card">
+          <h3>全平台播放量趋势</h3>
+          <div class="sub" id="anChartSub">近 7 天每日播放量（万次）</div>
+          <svg class="chart-svg" viewBox="0 0 640 230" preserveAspectRatio="none" style="height:220px">
+            <defs>
+              <linearGradient id="pArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d946ef" stop-opacity=".32"/><stop offset="1" stop-color="#d946ef" stop-opacity="0"/></linearGradient>
+              <linearGradient id="pLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#d946ef"/></linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,.06)" stroke-width="1">
+              <line x1="0" y1="46" x2="640" y2="46"/><line x1="0" y1="92" x2="640" y2="92"/><line x1="0" y1="138" x2="640" y2="138"/><line x1="0" y1="184" x2="640" y2="184"/>
+            </g>
+            <path d="M0,168 L80,150 L160,132 L240,138 L320,108 L400,86 L480,64 L560,44 L640,30 L640,230 L0,230 Z" fill="url(#pArea)"/>
+            <path d="M0,168 L80,150 L160,132 L240,138 L320,108 L400,86 L480,64 L560,44 L640,30" fill="none" stroke="url(#pLine)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="chart-legend"><span><i style="background:#d946ef"></i>播放量（万）</span><span style="margin-left:auto" id="anChartLegend">周一 → 周日</span></div>
+        </div>
+        <div class="chart-card">
+          <h3>平台分发状态</h3>
+          <div class="sub">一键分发至主流短视频平台</div>
+          <div class="table-scroll">
+            <table class="data-table" style="min-width:440px">
+              <thead><tr><th>平台</th><th>状态</th><th>播放量</th><th>收益</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-title">🎵 抖音</td><td><span class="tag green">已发布</span></td><td class="cell-mono">12.1 亿</td><td class="cell-mono">¥283 万</td></tr>
+                <tr><td class="cell-title">⚡ 快手</td><td><span class="tag green">已发布</span></td><td class="cell-mono">6.8 亿</td><td class="cell-mono">¥139 万</td></tr>
+                <tr><td class="cell-title">▶️ 视频号</td><td><span class="tag amber">审核中</span></td><td class="cell-dim">—</td><td class="cell-dim">—</td></tr>
+                <tr><td class="cell-title">🍉 西瓜视频</td><td><span class="tag gray">待发布</span></td><td class="cell-dim">—</td><td class="cell-dim">—</td></tr>
+                <tr><td class="cell-title">📺 B站</td><td><span class="tag green">已发布</span></td><td class="cell-mono">2.2 亿</td><td class="cell-mono">¥64 万</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 角色权限 ============ -->
+    <section class="sec" id="sec-roles">
+      <div class="page-head">
+        <div><h1>角色权限</h1><p>配置管理员角色与细粒度权限，管理后台账号。</p></div>
+        <div class="head-actions"><button class="btn btn-grad" onclick="openRoleModal()">＋ 新建角色</button></div>
+      </div>
+      <div class="table-wrap" style="margin-bottom:20px">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>角色名称</th><th>成员数</th><th>描述</th><th>权限概览</th><th>类型</th><th style="text-align:right">操作</th></tr></thead>
+            <tbody id="roleTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <h3><span class="ic">👤</span>管理员账号</h3>
+        <div class="sub">后台登录账号及所属角色。</div>
+        <div class="table-scroll">
+          <table class="data-table" style="min-width:560px">
+            <thead><tr><th>账号</th><th>姓名</th><th>角色</th><th>最后登录</th><th>状态</th><th style="text-align:right">操作</th></tr></thead>
+            <tbody id="adminTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 系统设置 ============ -->
+    <section class="sec" id="sec-settings">
+      <div class="page-head">
+        <div><h1>系统设置</h1><p>站点基础信息、审核策略与安全配置。</p></div>
+      </div>
+      <div class="dash-grid">
+        <div class="panel">
+          <h3><span class="ic">🏠</span>基础信息</h3>
+          <div class="m-field"><label>站点名称</label><input id="setName" value="漫剧工场 REELMANGA" /></div>
+          <div class="m-field"><label>站点域名</label><input value="https://www.reelmanga.cn" /></div>
+          <div class="m-field"><label>站点公告</label><textarea id="setNotice">全新多 Agent 漫剧引擎 v4.2 已上线，创作效率再提升 40%。</textarea></div>
+          <div class="m-field"><label>客服邮箱</label><input value="support@reelmanga.cn" /></div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:16px">
+            <h3><span class="ic">🛡️</span>审核策略</h3>
+            <div class="set-row"><div class="st-body"><div class="st-name">新用户注册审核</div><div class="st-desc">开启后新注册用户需人工审核</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div class="st-body"><div class="st-name">作品自动审核</div><div class="st-desc">AI 预审后自动上架</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div class="st-body"><div class="st-name">评论先审后发</div><div class="st-desc">所有评论需审核通过后展示</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div class="st-body"><div class="st-name">敏感内容告警</div><div class="st-desc">违规内容实时推送管理员</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="panel">
+            <h3><span class="ic">🔐</span>安全设置</h3>
+            <div class="set-row"><div class="st-body"><div class="st-name">登录二次验证</div><div class="st-desc">管理员登录需短信验证码</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div class="st-body"><div class="st-name">异地登录提醒</div><div class="st-desc">异常 IP 登录邮件告警</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel mt16">
+        <h3><span class="ic">💳</span>支付配置</h3>
+        <div class="m-row">
+          <div class="m-field"><label>微信支付商户号</label><input value="190000****" /></div>
+          <div class="m-field"><label>支付宝 App ID</label><input value="202100****" /></div>
+        </div>
+        <div class="m-row">
+          <div class="m-field"><label>分成比例（平台 / 创作者）</label><input value="70% / 30%" /></div>
+          <div class="m-field"><label>最低提现金额</label><input value="¥100" /></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button class="btn btn-ghost" onclick="toast('已重置为默认配置')">↺ 重置</button>
+        <button class="btn btn-grad" onclick="saveSettings()">💾 保存设置</button>
+      </div>
+    </section>
+
+    <!-- ============ 操作日志 ============ -->
+    <section class="sec" id="sec-logs">
+      <div class="page-head">
+        <div><h1>操作日志</h1><p>记录管理员在后台的全部关键操作，便于审计追溯。</p></div>
+        <div class="head-actions"><button class="btn btn-ghost" onclick="exportLogs()">⬇ 导出日志</button></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="搜索操作人 / 内容…" oninput="FILTER.logs.q=this.value;renderLogs()" /></div>
+        <div class="filter"><select onchange="FILTER.logs.module=this.value;renderLogs()"><option value="全部">全部模块</option><option value="用户管理">用户管理</option><option value="作品管理">作品管理</option><option value="评论管理">评论管理</option><option value="订单管理">订单管理</option><option value="模型服务">模型服务</option><option value="角色权限">角色权限</option><option value="系统设置">系统设置</option></select></div>
+        <div class="filter"><select onchange="FILTER.logs.result=this.value;renderLogs()"><option value="全部">全部结果</option><option value="成功">成功</option><option value="失败">失败</option></select></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>时间</th><th>操作人</th><th>模块</th><th>操作内容</th><th>IP 地址</th><th>结果</th></tr></thead>
+            <tbody id="logTbody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="logPager"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ============ 用户弹窗 ============ -->
+<div class="modal" id="userModal" onclick="if(event.target===this)closeModal('userModal')">
+  <div class="modal-card">
+    <div class="modal-head"><h3 id="userModalTitle">新增用户</h3><span class="modal-close" onclick="closeModal('userModal')">✕</span></div>
+    <div class="m-row">
+      <div class="m-field"><label>昵称 <span class="req">*</span></label><input id="uName" placeholder="请输入昵称" /></div>
+      <div class="m-field"><label>手机号 <span class="req">*</span></label><input id="uPhone" placeholder="11 位手机号" /></div>
+    </div>
+    <div class="m-row">
+      <div class="m-field"><label>会员等级</label><select id="uLevel"><option>普通用户</option><option>创作者</option><option>Pro 会员</option><option>工作室</option></select></div>
+      <div class="m-field"><label>状态</label><select id="uStatus"><option>正常</option><option>封禁</option></select></div>
+    </div>
+    <div class="m-field"><label>备注</label><textarea id="uNote" placeholder="选填，内部备注信息"></textarea></div>
+    <div class="m-actions"><button class="btn btn-ghost" onclick="closeModal('userModal')">取消</button><button class="btn btn-grad" onclick="saveUser()">保存</button></div>
+  </div>
+</div>
+
+<!-- ============ 供应商弹窗 ============ -->
+<div class="modal" id="providerModal" onclick="if(event.target===this)closeModal('providerModal')">
+  <div class="modal-card">
+    <div class="modal-head"><h3>添加 / 编辑模型供应商</h3><span class="modal-close" onclick="closeModal('providerModal')">✕</span></div>
+    <div class="m-field"><label>供应商预设</label><select id="pvPreset" onchange="presetChanged()"></select></div>
+    <div class="m-field"><label>API Key</label><input id="pvKey" placeholder="sk-... 或中转站密钥" /></div>
+    <div class="m-field"><label>API 地址（Base URL）</label><input id="pvBase" placeholder="https://api.xxx.com/v1" /></div>
+    <div class="m-field"><label>模型名称（逗号分隔）</label><input id="pvModels" placeholder="deepseek-chat, deepseek-reasoner" /></div>
+    <div class="m-field"><label>支持能力</label>
+      <div class="perm-group"><div class="pg-body">
+        <label class="perm-chip on" data-cap="llm"><input type="checkbox" checked onchange="this.parentElement.classList.toggle('on',this.checked)">🧠 LLM 对话</label>
+        <label class="perm-chip" data-cap="img"><input type="checkbox" onchange="this.parentElement.classList.toggle('on',this.checked)">🖼️ 生图</label>
+        <label class="perm-chip" data-cap="video"><input type="checkbox" onchange="this.parentElement.classList.toggle('on',this.checked)">🎬 生视频</label>
+        <label class="perm-chip" data-cap="tts"><input type="checkbox" onchange="this.parentElement.classList.toggle('on',this.checked)">🎙️ 配音</label>
+      </div></div>
+    </div>
+    <div class="m-actions"><button class="btn btn-ghost" onclick="closeModal('providerModal')">取消</button><button class="btn btn-grad" onclick="saveProvider()">保存供应商</button></div>
+  </div>
+</div>
+
+<!-- ============ 角色弹窗 ============ -->
+<div class="modal" id="roleModal" onclick="if(event.target===this)closeModal('roleModal')">
+  <div class="modal-card wide">
+    <div class="modal-head"><h3 id="roleModalTitle">新建角色</h3><span class="modal-close" onclick="closeModal('roleModal')">✕</span></div>
+    <div class="m-row">
+      <div class="m-field"><label>角色名称 <span class="req">*</span></label><input id="rName" placeholder="例如：审核员" /></div>
+      <div class="m-field"><label>描述</label><input id="rDesc" placeholder="角色职责说明" /></div>
+    </div>
+    <div class="m-field"><label>权限配置</label><div id="rolePerms" class="mt16"></div></div>
+    <div class="m-actions"><button class="btn btn-ghost" onclick="closeModal('roleModal')">取消</button><button class="btn btn-grad" onclick="saveRole()">保存角色</button></div>
+  </div>
+</div>
+
+<!-- ============ 确认弹窗 ============ -->
+<div class="modal" id="confirmModal" onclick="if(event.target===this)closeModal('confirmModal')">
+  <div class="modal-card" style="max-width:400px">
+    <div class="confirm-icon" id="confirmIcon">⚠️</div>
+    <div class="confirm-text"><h3 id="confirmTitle">确认操作</h3><p id="confirmMsg">此操作不可撤销，请谨慎确认。</p></div>
+    <div class="m-actions" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">取消</button>
+      <button class="btn btn-grad" id="confirmBtn" onclick="doConfirm()">确认</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ================= 通用工具 ================= */
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+function openModal(id){ document.getElementById(id).classList.add("show"); }
+function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+function fmtMoney(n){ return "¥" + Number(n).toLocaleString("zh-CN"); }
+
+/* 头像渐变 */
+const AVA_GRADS = ["linear-gradient(135deg,#8b5cf6,#d946ef)","linear-gradient(135deg,#22d3ee,#8b5cf6)","linear-gradient(135deg,#fb7185,#d946ef)","linear-gradient(135deg,#fb923c,#fb7185)","linear-gradient(135deg,#4ade80,#22d3ee)","linear-gradient(135deg,#fbbf24,#fb923c)"];
+function avaGrad(name){ let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0; return AVA_GRADS[h%AVA_GRADS.length]; }
+function avatar(name){ return `<span class="u-avatar" style="background:${avaGrad(name)}">${(name||"?").slice(0,1)}</span>`; }
+
+/* ================= 视图切换 ================= */
+const SEC_TITLES = {
+  dashboard:["仪表盘","/ 工作台总览"],
+  users:["用户管理","/ 用户与创作者账号"],
+  works:["作品管理","/ 内容审核与上下架"],
+  comments:["评论管理","/ 社区内容审核"],
+  orders:["订单管理","/ 付费与退款"],
+  models:["模型服务","/ AI 供应商与路由"],
+  analytics:["数据统计","/ 运营与变现数据"],
+  roles:["角色权限","/ 角色与后台账号"],
+  settings:["系统设置","/ 站点与安全配置"],
+  logs:["操作日志","/ 审计与追溯"],
+};
+function switchSec(name){
+  document.querySelectorAll(".sec").forEach(s=>s.classList.remove("active"));
+  const el = document.getElementById("sec-"+name);
+  if(el) el.classList.add("active");
+  document.querySelectorAll(".side-nav-item").forEach(b=>b.classList.toggle("active", b.dataset.sec===name));
+  const t = SEC_TITLES[name] || [name,""];
+  document.getElementById("pageTitle").textContent = t[0];
+  document.getElementById("pageCrumb").textContent = t[1];
+  closeSidebarMobile();
+  window.scrollTo({top:0});
+}
+
+/* ================= 侧边栏 ================= */
+function toggleSidebar(){
+  const sb = document.getElementById("sidebar");
+  if(window.innerWidth < 1080){
+    sb.classList.toggle("open");
+    document.getElementById("sidebarBackdrop").classList.toggle("show", sb.classList.contains("open"));
+  } else {
+    document.querySelector(".admin-shell").classList.toggle("collapsed");
+  }
+}
+function closeSidebarMobile(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebarBackdrop").classList.remove("show");
+}
+
+/* ================= 登录 ================= */
+function doAdminLogin(){
+  const acc = document.getElementById("loginAccount").value.trim();
+  const pwd = document.getElementById("loginPass").value;
+  if(!acc || !pwd){ toast("请输入管理员账号和密码"); return; }
+  enterAdmin();
+  toast("登录成功，欢迎回来 👋");
+}
+function skipLogin(){ enterAdmin(); }
+function enterAdmin(){
+  document.getElementById("loginScreen").classList.add("hide");
+}
+function adminLogout(){
+  document.getElementById("loginScreen").classList.remove("hide");
+  document.getElementById("loginPass").value = "";
+  toast("已安全退出后台");
+}
+
+/* ================= 通知 ================= */
+const NOTIFS = [
+  {ic:"🎬", text:"《仙帝归来之都市战神》提交审核，请尽快处理", time:"2 分钟前", unread:true},
+  {ic:"👤", text:"新创作者「陈默」完成实名认证", time:"18 分钟前", unread:true},
+  {ic:"💰", text:"今日收益突破 ¥10 万，同比 +32%", time:"1 小时前", unread:true},
+  {ic:"⚠️", text:"收到 3 条作品侵权举报，待处理", time:"3 小时前", unread:true},
+  {ic:"🎬", text:"《甜宠：豪门千金的隐婚》通过审核", time:"5 小时前", unread:false},
+  {ic:"🔌", text:"MiniMax 供应商 API 连接延迟偏高", time:"昨天", unread:false},
+];
+function renderNotifs(){
+  document.getElementById("notifList").innerHTML = NOTIFS.map((n,i)=>`
+    <div class="notif-item" onclick="readNotif(${i})">
+      <span class="n-ic">${n.ic}</span>
+      <div class="n-body"><div class="n-text">${n.text}</div><div class="n-time">${n.time}</div></div>
+      ${n.unread ? '<span class="n-unread"></span>' : ''}
+    </div>`).join("");
+  updateNotifDot();
+}
+function updateNotifDot(){
+  document.getElementById("notifDot").style.display = NOTIFS.some(n=>n.unread) ? "block" : "none";
+}
+function toggleNotif(e){ e.stopPropagation(); document.getElementById("notifDrop").classList.toggle("show"); }
+function closeNotif(){ document.getElementById("notifDrop").classList.remove("show"); }
+function readNotif(i){
+  NOTIFS[i].unread = false;
+  renderNotifs();
+  const mods = {0:"works",1:"users",2:"analytics",3:"works",4:"works",5:"models"};
+  closeNotif();
+  switchSec(mods[i] || "dashboard");
+  toast("已跳转处理该通知");
+}
+function markAllRead(){ NOTIFS.forEach(n=>n.unread=false); renderNotifs(); toast("已全部标记为已读"); }
+document.addEventListener("click", function(e){ if(!e.target.closest(".notif-wrap")) closeNotif(); });
+
+/* ================= 管理员菜单 ================= */
+function toggleAdminMenu(e){ e.stopPropagation(); document.getElementById("adminDrop").classList.toggle("show"); }
+function closeAdminMenu(){ document.getElementById("adminDrop").classList.remove("show"); }
+document.addEventListener("click", function(e){ if(!e.target.closest(".admin-menu")) closeAdminMenu(); });
+
+/* ================= 全局搜索 ================= */
+function globalSearch(e){
+  if(e.key !== "Enter") return;
+  const q = document.getElementById("globalSearch").value.trim();
+  if(!q){ toast("请输入搜索关键词"); return; }
+  FILTER.users.q = q;
+  switchSec("users");
+  renderUsers();
+  toast("已搜索用户「" + q + "」，共匹配结果");
+}
+
+/* ================= 分页 ================= */
+const PAGES = {};
+function paginate(key, list, pageSize){
+  const st = PAGES[key] = PAGES[key] || {page:1};
+  st.list = list; st.pageSize = pageSize || 6;
+  const total = Math.max(1, Math.ceil(list.length / st.pageSize));
+  if(st.page > total) st.page = total;
+  const start = (st.page-1)*st.pageSize;
+  return { items:list.slice(start, start+st.pageSize), page:st.page, total, totalRows:list.length };
+}
+function pagerHTML(key, p){
+  const nums = [];
+  for(let i=1;i<=p.total;i++){
+    if(i===1 || i===p.total || Math.abs(i-p.page)<=1) nums.push(i);
+    else if(nums[nums.length-1] !== "…") nums.push("…");
+  }
+  return `<span class="pager-info">共 ${p.totalRows} 条 · 第 ${p.page}/${p.total} 页</span>
+    <button class="pg-btn" ${p.page<=1?'disabled':''} onclick="goPage('${key}',${p.page-1})">‹</button>
+    ${nums.map(n=> n==="…" ? '<span class="pg-dots">…</span>' : `<button class="pg-btn ${n===p.page?'on':''}" onclick="goPage('${key}',${n})">${n}</button>`).join("")}
+    <button class="pg-btn" ${p.page>=p.total?'disabled':''} onclick="goPage('${key}',${p.page+1})">›</button>`;
+}
+const PAGE_RENDER = { users:renderUsers, works:renderWorks, comments:renderComments, orders:renderOrders, logs:renderLogs };
+function goPage(key, n){ PAGES[key].page = n; PAGE_RENDER[key](); }
+function emptyRow(cols, msg){ return `<tr><td colspan="${cols}" class="empty">${msg}</td></tr>`; }
+function checkAll(btn, cls){
+  document.querySelectorAll("." + cls).forEach(c=>c.checked = btn.checked);
+}
+
+/* ================= 数据 ================= */
+const FILTER = {
+  users:{q:"", level:"全部", status:"全部"},
+  works:{q:"", status:"全部", genre:"全部"},
+  comments:{q:"", status:"全部"},
+  orders:{q:"", status:"全部", plan:"全部"},
+  logs:{q:"", module:"全部", result:"全部"},
+};
+
+const USERS = [
+  {id:1, name:"苏念", phone:"13800138000", level:"工作室", status:"正常", works:38, amount:2860, reg:"2025-01-12", last:"2025-06-18 09:24"},
+  {id:2, name:"陈默", phone:"13900139000", level:"创作者", status:"正常", works:24, amount:1560, reg:"2025-02-03", last:"2025-06-18 08:51"},
+  {id:3, name:"林小雨", phone:"13700137000", level:"Pro 会员", status:"正常", works:17, amount:1320, reg:"2025-02-18", last:"2025-06-18 08:10"},
+  {id:4, name:"苏念工作室", phone:"13600136000", level:"工作室", status:"正常", works:62, amount:8820, reg:"2024-11-22", last:"2025-06-17 23:44"},
+  {id:5, name:"夜雨声烦", phone:"13500135000", level:"创作者", status:"封禁", works:9, amount:320, reg:"2025-03-09", last:"2025-06-12 15:02"},
+  {id:6, name:"白月光", phone:"13400134000", level:"普通用户", status:"正常", works:0, amount:0, reg:"2025-04-01", last:"2025-06-17 21:18"},
+  {id:7, name:"顾北", phone:"13300133000", level:"创作者", status:"正常", works:31, amount:2100, reg:"2025-01-28", last:"2025-06-18 07:42"},
+  {id:8, name:"爱吃鱼的猫", phone:"13200132000", level:"普通用户", status:"正常", works:0, amount:88, reg:"2025-04-15", last:"2025-06-16 12:30"},
+  {id:9, name:"墨尘工作室", phone:"13100131000", level:"工作室", status:"正常", works:45, amount:6420, reg:"2024-12-05", last:"2025-06-17 20:05"},
+  {id:10, name:"江晚吟", phone:"13000130000", level:"Pro 会员", status:"正常", works:12, amount:980, reg:"2025-03-20", last:"2025-06-15 19:22"},
+  {id:11, name:"流浪的诗人", phone:"18800188000", level:"创作者", status:"正常", works:7, amount:240, reg:"2025-05-02", last:"2025-06-14 11:08"},
+  {id:12, name:"匿名用户773", phone:"18700187000", level:"普通用户", status:"封禁", works:0, amount:0, reg:"2025-05-18", last:"2025-06-08 03:12"},
+];
+
+const WORKS = [
+  {id:1, title:"重生之凤逆天下", genre:"穿越重生", author:"苏念工作室", eps:60, plays:"2.1亿", time:"2025-06-17 22:10", status:"已上架"},
+  {id:2, title:"仙帝归来之都市战神", genre:"玄幻修真", author:"顾北", eps:48, plays:"9800万", time:"2025-06-17 18:40", status:"审核中"},
+  {id:3, title:"甜宠：豪门千金的隐婚", genre:"都市甜宠", author:"陈默", eps:72, plays:"1.6亿", time:"2025-06-16 15:22", status:"已上架"},
+  {id:4, title:"我的系统不正经", genre:"系统逆袭", author:"林小雨", eps:32, plays:"7600万", time:"2025-06-16 10:05", status:"审核中"},
+  {id:5, title:"恐怖直播间：开局遇鬼", genre:"悬疑惊悚", author:"夜雨声烦", eps:25, plays:"5400万", time:"2025-06-15 21:48", status:"违规下架"},
+  {id:6, title:"穿越之王妃是神医", genre:"穿越重生", author:"墨尘工作室", eps:60, plays:"8900万", time:"2025-06-15 14:33", status:"已上架"},
+  {id:7, title:"绝世赘婿", genre:"豪门商战", author:"苏念", eps:72, plays:"1.2亿", time:"2025-06-14 09:16", status:"已上架"},
+  {id:8, title:"凤倾天下：邪王宠妻", genre:"古风仙侠", author:"江晚吟", eps:66, plays:"3.4亿", time:"2025-06-13 20:57", status:"已上架"},
+  {id:9, title:"替嫁甜妻是大佬", genre:"都市甜宠", author:"陈默", eps:55, plays:"1.1亿", time:"2025-06-13 16:20", status:"已下架"},
+  {id:10, title:"开局觉醒神级系统", genre:"系统逆袭", author:"顾北", eps:88, plays:"1.9亿", time:"2025-06-12 11:44", status:"审核中"},
+  {id:11, title:"夜半诡影", genre:"悬疑惊悚", author:"流浪的诗人", eps:30, plays:"4200万", time:"2025-06-11 19:02", status:"已下架"},
+  {id:12, title:"逆袭吧！废柴少年", genre:"古风仙侠", author:"墨尘工作室", eps:40, plays:"6100万", time:"2025-06-10 13:29", status:"已上架"},
+];
+
+const COMMENTS = [
+  {id:1, user:"爱吃鱼的猫", content:"这部漫剧太好看了，女主重生复仇太爽了，追了三天停不下来！", work:"《重生之凤逆天下》", time:"2025-06-18 09:31", status:"待审核"},
+  {id:2, user:"白月光", content:"画面质感很棒，就是更新太慢了，求加更！", work:"《凤倾天下：邪王宠妻》", time:"2025-06-18 08:12", status:"正常"},
+  {id:3, user:"路人甲", content:"有没有一起追剧的姐妹，剧情讨论群加一下", work:"《甜宠：豪门千金的隐婚》", time:"2025-06-17 22:40", status:"待审核"},
+  {id:4, user:"暴躁老哥", content:"什么垃圾剧情，逻辑都不通，编剧出来挨打！", work:"《仙帝归来之都市战神》", time:"2025-06-17 20:15", status:"已删除"},
+  {id:5, user:"小甜心", content:"男主太帅了吧，求男主单人向剪辑！", work:"《绝世赘婿》", time:"2025-06-17 18:03", status:"正常"},
+  {id:6, user:"书虫", content:"原著粉来打卡，改编还原度很高，赞一个", work:"《穿越之王妃是神医》", time:"2025-06-17 15:26", status:"正常"},
+  {id:7, user:"夜猫子", content:"半夜看恐怖直播间吓死我了，但又忍不住想看", work:"《恐怖直播间：开局遇鬼》", time:"2025-06-16 23:58", status:"正常"},
+  {id:8, user:"吃瓜群众", content:"听说这部要下架了？发生什么事了", work:"《夜半诡影》", time:"2025-06-16 21:11", status:"待审核"},
+];
+
+const ORDERS = [
+  {id:1, no:"RM202506181203", user:"苏念工作室", plan:"工作室 Studio", amount:499, method:"微信支付", time:"2025-06-18 09:12", status:"已支付"},
+  {id:2, no:"RM202506180921", user:"陈默", plan:"创作者 Pro", amount:99, method:"支付宝", time:"2025-06-18 08:45", status:"已支付"},
+  {id:3, no:"RM202506175642", user:"白月光", plan:"打赏", amount:66, method:"微信支付", time:"2025-06-17 21:30", status:"已支付"},
+  {id:4, no:"RM202506173218", user:"顾北", plan:"创作者 Pro", amount:99, method:"Apple Pay", time:"2025-06-17 16:20", status:"已退款"},
+  {id:5, no:"RM202506170856", user:"江晚吟", plan:"创作者 Pro", amount:99, method:"微信支付", time:"2025-06-17 11:08", status:"已支付"},
+  {id:6, no:"RM202506163344", user:"墨尘工作室", plan:"工作室 Studio", amount:499, method:"对公转账", time:"2025-06-16 14:52", status:"已支付"},
+  {id:7, no:"RM202506161122", user:"林小雨", plan:"打赏", amount:30, method:"微信支付", time:"2025-06-16 10:11", status:"已支付"},
+  {id:8, no:"RM202506159988", user:"夜雨声烦", plan:"创作者 Pro", amount:99, method:"支付宝", time:"2025-06-15 19:44", status:"已退款"},
+  {id:9, no:"RM202506153322", user:"流浪的诗人", plan:"创作者 Pro", amount:99, method:"微信支付", time:"2025-06-15 13:20", status:"待支付"},
+  {id:10, no:"RM202506147766", user:"苏念", plan:"打赏", amount:128, method:"微信支付", time:"2025-06-14 22:03", status:"已支付"},
+];
+
+const LOGS = [
+  {time:"2025-06-18 09:32", admin:"系统管理员", module:"作品管理", action:"通过作品《仙帝归来之都市战神》审核", ip:"192.168.1.10", result:"成功"},
+  {time:"2025-06-18 09:05", admin:"运营-李娜", module:"用户管理", action:"新增用户「江晚吟」", ip:"192.168.1.23", result:"成功"},
+  {time:"2025-06-18 08:47", admin:"审核员-王强", module:"评论管理", action:"删除违规评论（ID: 40012）", ip:"192.168.1.18", result:"成功"},
+  {time:"2025-06-17 23:11", admin:"系统管理员", module:"系统设置", action:"修改「作品自动审核」策略为开启", ip:"192.168.1.10", result:"成功"},
+  {time:"2025-06-17 21:44", admin:"财务-赵敏", module:"订单管理", action:"处理退款订单 RM202506173218", ip:"192.168.1.31", result:"成功"},
+  {time:"2025-06-17 20:02", admin:"审核员-王强", module:"作品管理", action:"下架违规作品《恐怖直播间：开局遇鬼》", ip:"192.168.1.18", result:"成功"},
+  {time:"2025-06-17 16:40", admin:"运营-李娜", module:"模型服务", action:"编辑供应商「OpenAI」配置", ip:"192.168.1.23", result:"成功"},
+  {time:"2025-06-17 15:22", admin:"系统管理员", module:"角色权限", action:"新建角色「审核员」并配置权限", ip:"192.168.1.10", result:"成功"},
+  {time:"2025-06-17 11:08", admin:"财务-赵敏", module:"订单管理", action:"导出 6 月上半月订单报表", ip:"192.168.1.31", result:"成功"},
+  {time:"2025-06-16 18:30", admin:"审核员-王强", module:"评论管理", action:"通过评论（ID: 39988）审核", ip:"192.168.1.18", result:"成功"},
+  {time:"2025-06-16 09:15", admin:"运营-李娜", module:"用户管理", action:"封禁用户「夜雨声烦」", ip:"192.168.1.23", result:"成功"},
+  {time:"2025-06-15 20:40", admin:"系统管理员", module:"系统设置", action:"更新站点公告", ip:"192.168.1.10", result:"成功"},
+  {time:"2025-06-15 14:02", admin:"运营-李娜", module:"模型服务", action:"测试供应商「MiniMax」连接失败", ip:"192.168.1.23", result:"失败"},
+  {time:"2025-06-14 10:26", admin:"审核员-王强", module:"作品管理", action:"驳回作品《夜半诡影》并附理由", ip:"192.168.1.18", result:"成功"},
+];
+
+const GENRE_COLORS = {
+  "古风仙侠":"linear-gradient(160deg,#0ea5e9,#312e81)",
+  "都市甜宠":"linear-gradient(160deg,#fb7185,#be185d)",
+  "玄幻修真":"linear-gradient(160deg,#8b5cf6,#4c1d95)",
+  "系统逆袭":"linear-gradient(160deg,#fb923c,#dc2626)",
+  "悬疑惊悚":"linear-gradient(160deg,#334155,#020617)",
+  "穿越重生":"linear-gradient(160deg,#d946ef,#7c3aed)",
+  "豪门商战":"linear-gradient(160deg,#fbbf24,#b45309)",
+};
+const GENRE_DIST = [
+  {name:"古风仙侠", pct:28, count:24200},
+  {name:"都市甜宠", pct:24, count:20744},
+  {name:"玄幻修真", pct:18, count:15558},
+  {name:"系统逆袭", pct:13, count:11236},
+  {name:"穿越重生", pct:9, count:7779},
+  {name:"悬疑惊悚", pct:8, count:6915},
+];
+
+/* ================= 仪表盘渲染 ================= */
+function renderDashTodo(){
+  const todos = [
+    {ic:"🎬", t:"3 部作品待审核", s:"最新《仙帝归来之都市战神》于 18 分钟前提交", n:"3"},
+    {ic:"💬", t:"2 条评论待审核", s:"含 1 条疑似引流评论", n:"2"},
+    {ic:"⚠️", t:"3 条侵权举报", s:"涉及 2 部作品，需人工核实", n:"3"},
+    {ic:"💰", t:"1 笔退款待处理", s:"订单 RM202506173218 · ¥99", n:"1"},
+    {ic:"🔌", t:"MiniMax 延迟告警", s:"API 平均延迟 840ms，建议切换", n:"!"},
+  ];
+  document.getElementById("dashTodo").innerHTML = todos.map(t=>`
+    <div class="todo-item">
+      <span class="td-ic">${t.ic}</span>
+      <div class="td-body"><div class="td-title">${t.t}</div><div class="td-sub">${t.s}</div></div>
+      <span class="td-num">${t.n}</span>
+    </div>`).join("");
+}
+function renderDashNewUsers(){
+  const list = USERS.slice(0,5);
+  document.getElementById("dashNewUsers").innerHTML = list.map(u=>`
+    <div class="list-row">
+      ${avatar(u.name)}
+      <div class="lr-body"><div class="lr-title">${u.name}</div><div class="lr-sub">${u.phone}</div></div>
+      <div class="lr-right"><div class="lr-val">${u.level}</div><div class="lr-time">${u.reg}</div></div>
+    </div>`).join("");
+}
+function renderDashSys(){
+  const sys = [
+    {name:"创作流水线服务", val:"正常 · 12ms", cls:"ok"},
+    {name:"AI 模型网关", val:"正常 · 84ms", cls:"ok"},
+    {name:"视频渲染队列", val:"繁忙 · 214 任务", cls:"warn"},
+    {name:"对象存储 CDN", val:"正常 · 23ms", cls:"ok"},
+    {name:"消息推送服务", val:"正常 · 8ms", cls:"ok"},
+  ];
+  document.getElementById("dashSys").innerHTML = sys.map(s=>`
+    <div class="sys-item"><span class="sy-dot ${s.cls}"></span><span class="sy-name">${s.name}</span><span class="sy-val">${s.val}</span></div>`).join("");
+}
+function renderDashOrders(){
+  const list = ORDERS.slice(0,5);
+  document.getElementById("dashOrders").innerHTML = list.map(o=>`
+    <tr>
+      <td class="cell-mono cell-dim">${o.no}</td>
+      <td class="cell-user">${avatar(o.user)}<span class="cu-name">${o.user}</span></td>
+      <td class="cell-muted">${o.plan}</td>
+      <td class="cell-mono"><b>${fmtMoney(o.amount)}</b></td>
+      <td>${orderTag(o.status)}</td>
+      <td class="cell-dim">${o.time.slice(5)}</td>
+    </tr>`).join("");
+}
+function renderDashGenre(){
+  document.getElementById("dashGenre").innerHTML = GENRE_DIST.map(g=>`
+    <div class="rev-bar">
+      <div class="rb-top"><span>${g.name}</span><b>${g.pct}% · ${g.count.toLocaleString()} 部</b></div>
+      <div class="rb-track"><div class="rb-fill" style="width:${g.pct}%;background:${GENRE_COLORS[g.name]}"></div></div>
+    </div>`).join("");
+}
+
+/* ================= 用户管理 ================= */
+function userLevelTag(l){ return {普通用户:"gray",创作者:"violet","Pro 会员":"pink",工作室:"amber"}[l] || "gray"; }
+function userStatusTag(s){ return s==="正常" ? `<span class="tag green">正常</span>` : `<span class="tag red">封禁</span>`; }
+function renderUsers(){
+  const q = FILTER.users.q.toLowerCase();
+  const list = USERS.filter(u =>
+    (!q || (u.name + u.phone).toLowerCase().includes(q)) &&
+    (FILTER.users.level === "全部" || u.level === FILTER.users.level) &&
+    (FILTER.users.status === "全部" || u.status === FILTER.users.status)
+  );
+  const p = paginate("users", list, 6);
+  document.getElementById("userTbody").innerHTML = p.items.map(u=>`
+    <tr>
+      <td><input type="checkbox" class="ck userCk" /></td>
+      <td><div class="cell-user">${avatar(u.name)}<div><div class="cu-name">${u.name}</div><div class="cu-sub">${u.phone}</div></div></div></td>
+      <td><span class="tag ${userLevelTag(u.level)}">${u.level}</span></td>
+      <td class="cell-mono">${u.works}</td>
+      <td class="cell-mono">${u.amount ? fmtMoney(u.amount) : "—"}</td>
+      <td class="cell-dim">${u.reg}</td>
+      <td class="cell-dim">${u.last}</td>
+      <td>${userStatusTag(u.status)}</td>
+      <td><div class="cell-actions" style="justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="openUserModal(${u.id})">编辑</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleUserStatus(${u.id})">${u.status==="正常"?"封禁":"解封"}</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('已重置「${u.name}」的密码为 123456')">重置密码</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">删除</button>
+      </div></td>
+    </tr>`).join("") || emptyRow(9, "暂无匹配的用户");
+  document.getElementById("userPager").innerHTML = pagerHTML("users", p);
+}
+let editingUserId = null;
+function openUserModal(id){
+  editingUserId = id || null;
+  document.getElementById("userModalTitle").textContent = id ? "编辑用户" : "新增用户";
+  const u = id ? USERS.find(x=>x.id===id) : {name:"", phone:"", level:"普通用户", status:"正常", note:""};
+  document.getElementById("uName").value = u.name || "";
+  document.getElementById("uPhone").value = u.phone || "";
+  document.getElementById("uLevel").value = u.level || "普通用户";
+  document.getElementById("uStatus").value = u.status || "正常";
+  document.getElementById("uNote").value = u.note || "";
+  openModal("userModal");
+}
+function saveUser(){
+  const name = document.getElementById("uName").value.trim();
+  const phone = document.getElementById("uPhone").value.trim();
+  if(!name){ toast("请输入昵称"); return; }
+  if(!/^1\d{10}$/.test(phone)){ toast("请输入正确的 11 位手机号"); return; }
+  const level = document.getElementById("uLevel").value;
+  const status = document.getElementById("uStatus").value;
+  if(editingUserId){
+    const u = USERS.find(x=>x.id===editingUserId);
+    Object.assign(u, {name, phone, level, status});
+    toast("用户信息已更新 ✓");
+  } else {
+    const maxId = Math.max(0, ...USERS.map(x=>x.id));
+    USERS.unshift({id:maxId+1, name, phone, level, status, works:0, amount:0, reg:"2025-06-18", last:"—", note:document.getElementById("uNote").value});
+    toast("用户创建成功 ✓");
+  }
+  closeModal("userModal");
+  renderUsers();
+}
+function toggleUserStatus(id){
+  const u = USERS.find(x=>x.id===id);
+  u.status = u.status === "正常" ? "封禁" : "正常";
+  renderUsers();
+  toast(`用户「${u.name}」已${u.status==="正常"?"解封":"封禁"}`);
+}
+function deleteUser(id){
+  const u = USERS.find(x=>x.id===id);
+  confirmAction("删除用户", `确定要删除用户「${u.name}（${u.phone}）」吗？删除后其账号将无法登录。`, ()=>{
+    USERS.splice(USERS.findIndex(x=>x.id===id), 1);
+    renderUsers();
+    toast("用户已删除");
+  });
+}
+
+/* ================= 作品管理 ================= */
+function workStatusTag(s){
+  return {审核中:`<span class="tag blue">审核中</span>`, 已上架:`<span class="tag green">已上架</span>`, 已下架:`<span class="tag gray">已下架</span>`, 违规下架:`<span class="tag red">违规下架</span>`}[s] || `<span class="tag gray">${s}</span>`;
+}
+function renderWorks(){
+  const q = FILTER.works.q.toLowerCase();
+  const list = WORKS.filter(w =>
+    (!q || (w.title + w.author).toLowerCase().includes(q)) &&
+    (FILTER.works.status === "全部" || w.status === FILTER.works.status) &&
+    (FILTER.works.genre === "全部" || w.genre === FILTER.works.genre)
+  );
+  const p = paginate("works", list, 6);
+  document.getElementById("workTbody").innerHTML = p.items.map(w=>`
+    <tr>
+      <td><input type="checkbox" class="ck workCk" /></td>
+      <td><div class="cell-work">
+        <div class="work-thumb"><div class="wt-inner" style="background:${GENRE_COLORS[w.genre]}">🎬</div></div>
+        <div class="cell-title">《${w.title}》</div>
+      </div></td>
+      <td><span class="tag violet">${w.genre}</span></td>
+      <td class="cell-muted">${w.author}</td>
+      <td class="cell-mono">${w.eps} 集</td>
+      <td class="cell-mono">${w.plays}</td>
+      <td class="cell-dim">${w.time}</td>
+      <td>${workStatusTag(w.status)}</td>
+      <td><div class="cell-actions" style="justify-content:flex-end">
+        ${w.status === "审核中" ? `<button class="btn btn-grad btn-sm" onclick="reviewWork(${w.id},'pass')">✓ 通过</button><button class="btn btn-danger btn-sm" onclick="reviewWork(${w.id},'reject')">驳回</button>` : ""}
+        ${w.status === "已上架" ? `<button class="btn btn-ghost btn-sm" onclick="toggleWorkPublish(${w.id})">下架</button>` : ""}
+        ${w.status === "已下架" || w.status === "违规下架" ? `<button class="btn btn-ghost btn-sm" onclick="toggleWorkPublish(${w.id})">上架</button>` : ""}
+        <button class="btn btn-ghost btn-sm" onclick="toast('已打开《${w.title}》预览')">预览</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteWork(${w.id})">删除</button>
+      </div></td>
+    </tr>`).join("") || emptyRow(9, "暂无匹配的作品");
+  document.getElementById("workPager").innerHTML = pagerHTML("works", p);
+  updatePendingBadge();
+}
+function reviewWork(id, action){
+  const w = WORKS.find(x=>x.id===id);
+  w.status = action === "pass" ? "已上架" : "已下架";
+  renderWorks();
+  toast(`作品《${w.title}》已${action==="pass"?"通过并上架":"驳回"}`);
+}
+function toggleWorkPublish(id){
+  const w = WORKS.find(x=>x.id===id);
+  w.status = w.status === "已上架" ? "已下架" : "已上架";
+  renderWorks();
+  toast(`作品《${w.title}》已${w.status==="已上架"?"上架":"下架"}`);
+}
+function deleteWork(id){
+  const w = WORKS.find(x=>x.id===id);
+  confirmAction("删除作品", `确定要删除作品《${w.title}》吗？删除后数据将无法恢复。`, ()=>{
+    WORKS.splice(WORKS.findIndex(x=>x.id===id), 1);
+    renderWorks();
+    toast("作品已删除");
+  });
+}
+function updatePendingBadge(){
+  const n = WORKS.filter(w=>w.status==="审核中").length;
+  const b = document.getElementById("workPendingBadge");
+  b.textContent = n;
+  b.style.display = n ? "" : "none";
+}
+
+/* ================= 评论管理 ================= */
+function commentStatusTag(s){
+  return {正常:`<span class="tag green">正常</span>`, 待审核:`<span class="tag amber">待审核</span>`, 已删除:`<span class="tag gray">已删除</span>`}[s] || `<span class="tag gray">${s}</span>`;
+}
+function renderComments(){
+  const q = FILTER.comments.q.toLowerCase();
+  const list = COMMENTS.filter(c =>
+    (!q || (c.content + c.user + c.work).toLowerCase().includes(q)) &&
+    (FILTER.comments.status === "全部" || c.status === FILTER.comments.status)
+  );
+  const p = paginate("comments", list, 6);
+  document.getElementById("commentTbody").innerHTML = p.items.map(c=>`
+    <tr>
+      <td><div class="cell-user">${avatar(c.user)}<span class="cu-name">${c.user}</span></div></td>
+      <td><div class="cell-muted" style="max-width:360px;white-space:normal;line-height:1.5">${c.content}</div></td>
+      <td class="cell-muted">${c.work}</td>
+      <td class="cell-dim">${c.time}</td>
+      <td>${commentStatusTag(c.status)}</td>
+      <td><div class="cell-actions" style="justify-content:flex-end">
+        ${c.status === "待审核" ? `<button class="btn btn-grad btn-sm" onclick="passComment(${c.id})">通过</button><button class="btn btn-danger btn-sm" onclick="delComment(${c.id})">删除</button>` : ""}
+        ${c.status === "正常" ? `<button class="btn btn-danger btn-sm" onclick="delComment(${c.id})">删除</button>` : ""}
+        ${c.status === "已删除" ? `<button class="btn btn-ghost btn-sm" onclick="passComment(${c.id})">恢复</button>` : ""}
+      </div></td>
+    </tr>`).join("") || emptyRow(6, "暂无匹配的评论");
+  document.getElementById("commentPager").innerHTML = pagerHTML("comments", p);
+  updateCommentBadge();
+}
+function passComment(id){ const c = COMMENTS.find(x=>x.id===id); c.status = "正常"; renderComments(); toast("评论已通过审核"); }
+function delComment(id){ const c = COMMENTS.find(x=>x.id===id); c.status = "已删除"; renderComments(); toast("评论已删除"); }
+function updateCommentBadge(){
+  const n = COMMENTS.filter(c=>c.status==="待审核").length;
+  const b = document.getElementById("commentPendingBadge");
+  b.textContent = n;
+  b.style.display = n ? "" : "none";
+}
+
+/* ================= 订单管理 ================= */
+function orderTag(s){
+  return {已支付:`<span class="tag green">已支付</span>`, 待支付:`<span class="tag amber">待支付</span>`, 已退款:`<span class="tag gray">已退款</span>`}[s] || `<span class="tag gray">${s}</span>`;
+}
+function renderOrders(){
+  const q = FILTER.orders.q.toLowerCase();
+  const list = ORDERS.filter(o =>
+    (!q || (o.no + o.user).toLowerCase().includes(q)) &&
+    (FILTER.orders.status === "全部" || o.status === FILTER.orders.status) &&
+    (FILTER.orders.plan === "全部" || o.plan === FILTER.orders.plan)
+  );
+  const p = paginate("orders", list, 6);
+  document.getElementById("orderTbody").innerHTML = p.items.map(o=>`
+    <tr>
+      <td class="cell-mono cell-dim">${o.no}</td>
+      <td><div class="cell-user">${avatar(o.user)}<span class="cu-name">${o.user}</span></div></td>
+      <td class="cell-muted">${o.plan}</td>
+      <td class="cell-mono"><b>${fmtMoney(o.amount)}</b></td>
+      <td class="cell-muted">${o.method}</td>
+      <td class="cell-dim">${o.time}</td>
+      <td>${orderTag(o.status)}</td>
+      <td><div class="cell-actions" style="justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="toast('已打开订单 ${o.no} 详情')">详情</button>
+        ${o.status === "已支付" ? `<button class="btn btn-danger btn-sm" onclick="refundOrder(${o.id})">退款</button>` : ""}
+      </div></td>
+    </tr>`).join("") || emptyRow(8, "暂无匹配的订单");
+  document.getElementById("orderPager").innerHTML = pagerHTML("orders", p);
+}
+function refundOrder(id){
+  const o = ORDERS.find(x=>x.id===id);
+  confirmAction("订单退款", `确定要对订单 ${o.no}（${fmtMoney(o.amount)}）发起退款吗？退款将原路退回用户账户。`, ()=>{
+    o.status = "已退款";
+    renderOrders();
+    toast("退款已发起，预计 1-3 个工作日到账");
+  });
+}
+
+/* ================= 模型服务 ================= */
+const CAPS = { llm:{name:"LLM 对话",icon:"🧠"}, img:{name:"生图",icon:"🖼️"}, video:{name:"生视频",icon:"🎬"}, tts:{name:"配音",icon:"🎙️"} };
+const ROUTES = [
+  {key:"llm", name:"剧本创作 LLM", icon:"🧠", desc:"写剧本 · 扩写 · 润色"},
+  {key:"agents", name:"质检 Agent", icon:"🔍", desc:"多 Agent 剧本质检"},
+  {key:"img", name:"生图", icon:"🖼️", desc:"人物 · 场景生成"},
+  {key:"video", name:"生视频", icon:"🎬", desc:"动态漫 · 运镜"},
+  {key:"tts", name:"配音 TTS", icon:"🎙️", desc:"角色配音 · 旁白"},
+];
+const ROUTE_CAP = { llm:"llm", agents:"llm", img:"img", video:"video", tts:"tts" };
+let ROUTE_BINDING = { llm:"deepseek", agents:"deepseek", img:"openai", video:"kling", tts:"minimax" };
+const PROVIDERS = [
+  {id:"deepseek", name:"DeepSeek", brand:"#4d6bfe", type:"官方", key:"sk-deep****8f2a", base:"https://api.deepseek.com/v1", models:"deepseek-chat, deepseek-reasoner", caps:{llm:true,img:false,video:false,tts:false}},
+  {id:"openai", name:"OpenAI", brand:"#10a37f", type:"官方", key:"sk-proj****c9d1", base:"https://api.openai.com/v1", models:"gpt-4o, gpt-image-1, sora-2", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"anthropic", name:"Anthropic", brand:"#d97757", type:"官方", key:"", base:"https://api.anthropic.com", models:"claude-4-sonnet, claude-4-opus", caps:{llm:true,img:false,video:false,tts:false}},
+  {id:"google", name:"Google Gemini", brand:"#4285f4", type:"官方", key:"", base:"https://generativelanguage.googleapis.com", models:"gemini-2.5-pro, imagen-4, veo-3", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"qwen", name:"通义千问", brand:"#615ced", type:"官方", key:"", base:"https://dashscope.aliyuncs.com", models:"qwen-max, wan2.2, qwen-tts", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"zhipu", name:"智谱 GLM", brand:"#3859ff", type:"官方", key:"", base:"https://open.bigmodel.cn/api/paas/v4", models:"glm-4.5, cogview-4, cogvideox-3", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"kimi", name:"Moonshot Kimi", brand:"#16191d", type:"官方", key:"", base:"https://api.moonshot.cn/v1", models:"kimi-k2", caps:{llm:true,img:false,video:false,tts:false}},
+  {id:"volc", name:"豆包 · 火山引擎", brand:"#325ab4", type:"官方", key:"", base:"https://ark.cn-beijing.volces.com/api/v3", models:"doubao-pro, seedream-4, seedance-1.5", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"minimax", name:"MiniMax", brand:"#ff4d4f", type:"官方", key:"mm-****9a3c", base:"https://api.minimax.chat/v1", models:"abab-6.5s, hailuo-02, speech-02", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"kling", name:"可灵 Kling", brand:"#00d4aa", type:"官方", key:"kl-****3b7e", base:"https://api.klingai.com", models:"kling-2.1, kling-image", caps:{llm:false,img:true,video:true,tts:false}},
+  {id:"silicon", name:"硅基流动", brand:"#7c3aed", type:"中转站", key:"sk-sil****1e9f", base:"https://api.siliconflow.cn/v1", models:"deepseek-v3, qwen3, flux.1, kling", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"openrouter", name:"OpenRouter", brand:"#71717a", type:"中转站", key:"", base:"https://openrouter.ai/api/v1", models:"多模型聚合", caps:{llm:true,img:true,video:true,tts:false}},
+];
+function routeProvider(key){ return PROVIDERS.find(p=>p.id===ROUTE_BINDING[key]); }
+function maskKey(k){ return k.length<=8 ? k : k.slice(0,6) + "****" + k.slice(-4); }
+function renderModels(){
+  document.getElementById("routeList").innerHTML = ROUTES.map(r=>{
+    const bound = routeProvider(r.key);
+    const cap = ROUTE_CAP[r.key];
+    const opts = PROVIDERS.filter(p=>p.caps[cap]).map(p=>`<option value="${p.id}" ${p.id===ROUTE_BINDING[r.key]?'selected':''}>${p.name}</option>`).join("");
+    return `<div class="route-card">
+      <div class="r-ico">${r.icon}</div>
+      <div class="r-name">${r.name}</div>
+      <div class="r-desc">${r.desc}</div>
+      <select onchange="routeChange('${r.key}',this.value)">${opts}</select>
+      <div class="r-bound"><span class="tag ${bound?'green':'gray'}">${bound?'已绑定':'未绑定'}</span></div>
+    </div>`;
+  }).join("");
+  document.getElementById("providerList").innerHTML = PROVIDERS.map(providerCard).join("");
+}
+function providerCard(p){
+  const capBadges = Object.keys(CAPS).map(k=>`<span class="pc-cap ${p.caps[k]?'':'off'}">${CAPS[k].icon} ${CAPS[k].name}</span>`).join("");
+  const models = p.models.split(",").map(m=>`<span class="pc-model">${m.trim()}</span>`).join("");
+  const hasKey = !!p.key;
+  return `<div class="pv-card">
+    <div class="pv-head">
+      <span class="pv-logo" style="background:${p.brand}">${p.name[0]}</span>
+      <div class="pv-id"><div class="pv-name">${p.name}</div><div class="pv-sub">${p.type}${hasKey ? ' · 已配置' : ''}</div></div>
+      <span class="tag ${hasKey?'green':'gray'}">${hasKey?'已连接':'未配置'}</span>
+    </div>
+    <div class="pv-caprow">${capBadges}</div>
+    <div class="pv-info">
+      <div class="pv-line">🔑 ${hasKey ? p.key : '未填写 API Key'}</div>
+      <div class="pv-line">🌐 ${p.base}</div>
+      <div class="pv-models">${models}</div>
+    </div>
+    <div class="pv-actions">
+      ${hasKey ? `<button class="btn btn-ghost btn-sm" onclick="testProvider('${p.id}')">🔌 测试连接</button>` : ''}
+      <button class="btn btn-ghost btn-sm" onclick="openProviderModal('${p.id}')">${hasKey?'编辑':'配置'}</button>
+    </div>
+  </div>`;
+}
+function routeChange(key, val){
+  ROUTE_BINDING[key] = val;
+  const r = ROUTES.find(x=>x.key===key);
+  const p = PROVIDERS.find(x=>x.id===val);
+  toast((r?r.name:key) + " 已绑定 → " + (p?p.name:val));
+  renderModels();
+}
+function testProvider(id){
+  const p = PROVIDERS.find(x=>x.id===id);
+  toast(p.name + " 连接测试中…");
+  setTimeout(()=>toast("✓ " + p.name + " 连接成功 · 延迟 " + (40+Math.floor(Math.random()*160)) + "ms"), 900);
+}
+let editingProvider = null;
+function openProviderModal(id){
+  editingProvider = id || null;
+  const sel = document.getElementById("pvPreset");
+  sel.innerHTML = PROVIDERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+  sel.value = id || "custom";
+  const p = id ? PROVIDERS.find(x=>x.id===id) : {base:"", models:"", caps:{llm:false,img:false,video:false,tts:false}};
+  document.getElementById("pvKey").value = "";
+  document.getElementById("pvKey").placeholder = id ? "留空则保持原 Key 不变" : "sk-... 或中转站密钥";
+  document.getElementById("pvBase").value = p.base || "";
+  document.getElementById("pvModels").value = p.models || "";
+  document.querySelectorAll("#providerModal .perm-chip").forEach(ch=>ch.classList.toggle("on", !!p.caps[ch.dataset.cap]));
+  document.querySelectorAll("#providerModal .perm-chip input").forEach(inp=>inp.checked = !!p.caps[inp.parentElement.dataset.cap]);
+  openModal("providerModal");
+}
+function presetChanged(){
+  const id = document.getElementById("pvPreset").value;
+  const p = PROVIDERS.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById("pvBase").value = p.base;
+  document.getElementById("pvModels").value = p.models;
+  document.querySelectorAll("#providerModal .perm-chip").forEach(ch=>ch.classList.toggle("on", !!p.caps[ch.dataset.cap]));
+  document.querySelectorAll("#providerModal .perm-chip input").forEach(inp=>inp.checked = !!p.caps[inp.parentElement.dataset.cap]);
+}
+function saveProvider(){
+  const base = document.getElementById("pvBase").value.trim();
+  const models = document.getElementById("pvModels").value.trim();
+  const key = document.getElementById("pvKey").value.trim();
+  const caps = {};
+  document.querySelectorAll("#providerModal .perm-chip").forEach(ch=>{ caps[ch.dataset.cap] = ch.classList.contains("on"); });
+  let p;
+  if(editingProvider){
+    p = PROVIDERS.find(x=>x.id===editingProvider);
+  } else {
+    const preset = document.getElementById("pvPreset").value;
+    const src = PROVIDERS.find(x=>x.id===preset) || {name:"自定义", brand:"#8b5cf6", type:"中转站"};
+    p = {id: "custom-" + Date.now(), name: src.name + "（自建）", brand: src.brand, type: src.type, key:"", caps:{}};
+    PROVIDERS.push(p);
+  }
+  if(!p) return;
+  if(base) p.base = base;
+  if(models) p.models = models;
+  p.caps = caps;
+  if(key) p.key = maskKey(key);
+  closeModal("providerModal");
+  renderModels();
+  toast("供应商已保存 ✓");
+}
+
+/* ================= 角色权限 ================= */
+const PERM_GROUPS = {
+  dashboard:{name:"仪表盘", icon:"📊", perms:["view"]},
+  analytics:{name:"数据统计", icon:"📈", perms:["view"]},
+  users:{name:"用户管理", icon:"👥", perms:["view","edit","ban","delete"]},
+  works:{name:"作品管理", icon:"🎬", perms:["view","review","publish","delete"]},
+  comments:{name:"评论管理", icon:"💬", perms:["view","delete"]},
+  orders:{name:"订单管理", icon:"💰", perms:["view","refund"]},
+  models:{name:"模型服务", icon:"🔌", perms:["view","edit"]},
+  roles:{name:"角色权限", icon:"🛡️", perms:["view","edit"]},
+  settings:{name:"系统设置", icon:"⚙️", perms:["view","edit"]},
+  logs:{name:"操作日志", icon:"📜", perms:["view"]},
+};
+const PERM_LABELS = { view:"查看", edit:"编辑", ban:"封禁", delete:"删除", review:"审核", publish:"上下架", refund:"退款" };
+const FULL_PERMS = {};
+Object.keys(PERM_GROUPS).forEach(g=>{ FULL_PERMS[g] = [...PERM_GROUPS[g].perms]; });
+
+const ROLES = [
+  {id:"r1", name:"超级管理员", count:1, desc:"拥有全部权限", perms:FULL_PERMS, builtin:true},
+  {id:"r2", name:"运营", count:3, desc:"负责用户与内容运营", perms:{dashboard:["view"], analytics:["view"], users:["view","edit","ban"], works:["view","review","publish"], comments:["view","delete"], orders:["view"], models:["view"], logs:["view"]}, builtin:false},
+  {id:"r3", name:"审核员", count:2, desc:"负责作品与评论审核", perms:{dashboard:["view"], works:["view","review","publish"], comments:["view","delete"], logs:["view"]}, builtin:false},
+  {id:"r4", name:"财务", count:1, desc:"负责订单与退款", perms:{dashboard:["view"], analytics:["view"], orders:["view","refund"], logs:["view"]}, builtin:false},
+  {id:"r5", name:"只读访客", count:0, desc:"仅可查看数据", perms:{dashboard:["view"], analytics:["view"], users:["view"], works:["view"], comments:["view"], orders:["view"], models:["view"], logs:["view"]}, builtin:false},
+];
+const ADMINS = [
+  {acc:"admin", name:"系统管理员", role:"超级管理员", last:"2025-06-18 09:32", status:"正常"},
+  {acc:"lina", name:"李娜", role:"运营", last:"2025-06-18 09:05", status:"正常"},
+  {acc:"wangqiang", name:"王强", role:"审核员", last:"2025-06-17 20:02", status:"正常"},
+  {acc:"zhaomin", name:"赵敏", role:"财务", last:"2025-06-17 21:44", status:"正常"},
+  {acc:"guest", name:"访客账号", role:"只读访客", last:"2025-06-10 11:20", status:"停用"},
+];
+function permSummary(perms){
+  let n = 0;
+  Object.values(perms).forEach(list=>{ if(Array.isArray(list)) n += list.length; });
+  return n;
+}
+function renderRoles(){
+  document.getElementById("roleTbody").innerHTML = ROLES.map(r=>`
+    <tr>
+      <td class="cell-title">${r.name} ${r.builtin ? '<span class="tag pink" style="margin-left:4px">内置</span>' : ''}</td>
+      <td class="cell-mono">${r.count} 人</td>
+      <td class="cell-muted" style="max-width:220px;white-space:normal">${r.desc}</td>
+      <td class="cell-mono">${permSummary(r.perms)} 项权限</td>
+      <td><span class="tag ${r.builtin?'pink':'violet'}">${r.builtin?'系统内置':'自定义'}</span></td>
+      <td><div class="cell-actions" style="justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="openRoleModal('${r.id}')">编辑</button>
+        ${r.builtin ? '' : `<button class="btn btn-danger btn-sm" onclick="deleteRole('${r.id}')">删除</button>`}
+      </div></td>
+    </tr>`).join("");
+  document.getElementById("adminTbody").innerHTML = ADMINS.map(a=>`
+    <tr>
+      <td class="cell-mono">${a.acc}</td>
+      <td><div class="cell-user">${avatar(a.name)}<span class="cu-name">${a.name}</span></div></td>
+      <td><span class="tag violet">${a.role}</span></td>
+      <td class="cell-dim">${a.last}</td>
+      <td>${a.status==="正常" ? '<span class="tag green">正常</span>' : '<span class="tag gray">停用</span>'}</td>
+      <td><div class="cell-actions" style="justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="toast('已重置「${a.name}」的密码')">重置密码</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('管理员账号编辑（原型演示）')">编辑</button>
+      </div></td>
+    </tr>`).join("");
+}
+let editingRoleId = null;
+let rolePermDraft = {};
+function openRoleModal(id){
+  editingRoleId = id || null;
+  const r = id ? ROLES.find(x=>x.id===id) : {name:"", desc:"", perms:{}};
+  document.getElementById("roleModalTitle").textContent = id ? "编辑角色" : "新建角色";
+  document.getElementById("rName").value = r.name || "";
+  document.getElementById("rDesc").value = r.desc || "";
+  rolePermDraft = {};
+  Object.keys(PERM_GROUPS).forEach(g=>{ rolePermDraft[g] = [...((r.perms && r.perms[g]) || [])]; });
+  renderRolePerms();
+  openModal("roleModal");
+}
+function renderRolePerms(){
+  document.getElementById("rolePerms").innerHTML = Object.keys(PERM_GROUPS).map(g=>{
+    const grp = PERM_GROUPS[g];
+    const perms = grp.perms;
+    const allOn = rolePermDraft[g].length === perms.length;
+    return `<div class="perm-group">
+      <div class="pg-head"><span class="pg-ic">${grp.icon}</span>${grp.name}
+        <span class="pg-all"><label class="perm-chip ${allOn?'on':''}"><input type="checkbox" ${allOn?'checked':''} onchange="togglePermGroup('${g}')">全选</label></span>
+      </div>
+      <div class="pg-body">${perms.map(p=>`<label class="perm-chip ${rolePermDraft[g].includes(p)?'on':''}"><input type="checkbox" ${rolePermDraft[g].includes(p)?'checked':''} onchange="togglePerm('${g}','${p}')">${PERM_LABELS[p] || p}</label>`).join("")}</div>
+    </div>`;
+  }).join("");
+}
+function togglePerm(g, p){
+  const arr = rolePermDraft[g];
+  const i = arr.indexOf(p);
+  if(i > -1) arr.splice(i,1); else arr.push(p);
+  renderRolePerms();
+}
+function togglePermGroup(g){
+  const perms = PERM_GROUPS[g].perms;
+  rolePermDraft[g] = rolePermDraft[g].length === perms.length ? [] : [...perms];
+  renderRolePerms();
+}
+function saveRole(){
+  const name = document.getElementById("rName").value.trim();
+  if(!name){ toast("请输入角色名称"); return; }
+  const desc = document.getElementById("rDesc").value.trim();
+  if(editingRoleId){
+    const r = ROLES.find(x=>x.id===editingRoleId);
+    r.name = name; r.desc = desc; r.perms = JSON.parse(JSON.stringify(rolePermDraft));
+    toast("角色已更新 ✓");
+  } else {
+    ROLES.push({id:"r"+Date.now(), name, desc, count:0, perms:JSON.parse(JSON.stringify(rolePermDraft)), builtin:false});
+    toast("角色创建成功 ✓");
+  }
+  closeModal("roleModal");
+  renderRoles();
+}
+function deleteRole(id){
+  const r = ROLES.find(x=>x.id===id);
+  if(r.count > 0){ toast("该角色下还有成员，无法删除"); return; }
+  confirmAction("删除角色", `确定要删除角色「${r.name}」吗？`, ()=>{
+    ROLES.splice(ROLES.findIndex(x=>x.id===id), 1);
+    renderRoles();
+    toast("角色已删除");
+  });
+}
+
+/* ================= 数据统计 ================= */
+const RANGE_DATA = {
+  "7d": {plays:"21.4", unit:"亿", playsT:"▲ 12.4% 较上周", earn:"¥486", earnUnit:"万", earnT:"▲ 8.1% 较上周", conv:"6.8", convT:"▲ 0.6%", fin:"68", finT:"▲ 2.6%", sub:"近 7 天每日播放量（万次）", legend:"周一 → 周日"},
+  "30d": {plays:"86.2", unit:"亿", playsT:"▲ 15.7% 较上月", earn:"¥1,860", earnUnit:"万", earnT:"▲ 11.3% 较上月", conv:"7.2", convT:"▲ 0.4%", fin:"71", finT:"▲ 1.9%", sub:"近 30 天每日播放量（万次）", legend:"6 月 1 日 → 6 月 30 日"},
+  "all": {plays:"132.5", unit:"亿", playsT:"▲ 历史累计", earn:"¥9,420", earnUnit:"万", earnT:"▲ 历史累计", conv:"7.9", convT:"▲ 平台均值", fin:"69", finT:"▲ 平台均值", sub:"历史累计播放趋势", legend:"累计"},
+};
+function setRange(btn, range){
+  document.querySelectorAll("#rangeSeg button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  const d = RANGE_DATA[range];
+  document.getElementById("anPlays").innerHTML = d.plays + "<small>" + d.unit + "</small>";
+  document.getElementById("anPlaysT").textContent = d.playsT;
+  document.getElementById("anEarn").innerHTML = d.earn + "<small>" + d.earnUnit + "</small>";
+  document.getElementById("anEarnT").textContent = d.earnT;
+  document.getElementById("anConv").innerHTML = d.conv + "<small>%</small>";
+  document.getElementById("anConvT").textContent = d.convT;
+  document.getElementById("anFin").innerHTML = d.fin + "<small>%</small>";
+  document.getElementById("anFinT").textContent = d.finT;
+  document.getElementById("anChartSub").textContent = d.sub;
+  document.getElementById("anChartLegend").textContent = d.legend;
+}
+
+/* ================= 系统设置 ================= */
+function saveSettings(){
+  toast("系统设置已保存 ✓");
+}
+
+/* ================= 操作日志 ================= */
+function logResultTag(s){ return s==="成功" ? `<span class="tag green">成功</span>` : `<span class="tag red">失败</span>`; }
+function renderLogs(){
+  const q = FILTER.logs.q.toLowerCase();
+  const list = LOGS.filter(l =>
+    (!q || (l.admin + l.action).toLowerCase().includes(q)) &&
+    (FILTER.logs.module === "全部" || l.module === FILTER.logs.module) &&
+    (FILTER.logs.result === "全部" || l.result === FILTER.logs.result)
+  );
+  const p = paginate("logs", list, 8);
+  document.getElementById("logTbody").innerHTML = p.items.map(l=>`
+    <tr>
+      <td class="cell-dim cell-mono">${l.time}</td>
+      <td><div class="cell-user">${avatar(l.admin)}<span class="cu-name">${l.admin}</span></div></td>
+      <td><span class="tag violet">${l.module}</span></td>
+      <td class="cell-muted" style="max-width:320px;white-space:normal">${l.action}</td>
+      <td class="cell-mono cell-dim">${l.ip}</td>
+      <td>${logResultTag(l.result)}</td>
+    </tr>`).join("") || emptyRow(6, "暂无匹配的日志");
+  document.getElementById("logPager").innerHTML = pagerHTML("logs", p);
+}
+function exportLogs(){ toast("操作日志已导出为 CSV ✓"); }
+
+/* ================= 确认弹窗 ================= */
+let confirmCb = null;
+function confirmAction(title, msg, cb){
+  document.getElementById("confirmTitle").textContent = title;
+  document.getElementById("confirmMsg").textContent = msg;
+  document.getElementById("confirmIcon").className = "confirm-icon";
+  document.getElementById("confirmIcon").textContent = "⚠️";
+  document.getElementById("confirmBtn").className = "btn btn-grad";
+  document.getElementById("confirmBtn").textContent = "确认";
+  confirmCb = cb;
+  openModal("confirmModal");
+}
+function doConfirm(){
+  if(confirmCb){ const cb = confirmCb; confirmCb = null; cb(); }
+  closeModal("confirmModal");
+}
+
+/* ================= 模型卡片样式补充 ================= */
+const modelStyle = document.createElement("style");
+modelStyle.textContent = `
+.route-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.route-card{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:15px;transition:.2s}
+.route-card:hover{border-color:var(--border-2)}
+.route-card .r-ico{font-size:22px;margin-bottom:6px}
+.route-card .r-name{font-weight:800;font-size:13.5px}
+.route-card .r-desc{font-size:11.5px;color:var(--dim);margin-bottom:10px}
+.route-card select{width:100%;height:36px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:9px;color:var(--text);padding:0 10px;font-size:12.5px;outline:none}
+.route-card select option{background:var(--bg-2)}
+.route-card .r-bound{margin-top:9px}
+.pv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pv-card{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:16px;transition:.2s}
+.pv-card:hover{border-color:var(--border-2)}
+.pv-head{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.pv-logo{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0}
+.pv-id{flex:1;min-width:0}
+.pv-name{font-weight:800;font-size:14px}
+.pv-sub{font-size:11.5px;color:var(--dim)}
+.pv-caprow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px}
+.pc-cap{font-size:10.5px;padding:2px 8px;border-radius:6px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);color:#d8c8ff}
+.pc-cap.off{background:transparent;border-color:var(--border);color:var(--dim);opacity:.5}
+.pv-info{font-size:11.5px;color:var(--muted);line-height:1.7;margin-bottom:11px}
+.pv-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-models{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.pc-model{font-size:10.5px;padding:2px 7px;border-radius:5px;background:var(--card-2);border:1px solid var(--border);color:var(--muted)}
+.pv-actions{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:1180px){.route-grid{grid-template-columns:repeat(3,1fr)}.pv-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.route-grid{grid-template-columns:1fr}.pv-grid{grid-template-columns:1fr}}
+`;
+document.head.appendChild(modelStyle);
+
+/* ================= 启动 ================= */
+renderDashTodo();
+renderDashNewUsers();
+renderDashSys();
+renderDashOrders();
+renderDashGenre();
+renderNotifs();
+renderUsers();
+renderWorks();
+renderComments();
+renderOrders();
+renderModels();
+renderRoles();
+renderLogs();
+</script>
+</body>
+</html>
