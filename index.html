@@ -459,6 +459,37 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
 .u-drop .u-drop-line{height:1px;background:var(--border);margin:6px 0}
 .u-drop .u-logout{color:var(--rose)}
 
+/* ============ 模型服务 ============ */
+.sec-label{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.route-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.route-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;transition:.25s}
+.route-card:hover{border-color:var(--border-2)}
+.route-card .r-ico{font-size:24px;margin-bottom:8px}
+.route-card .r-name{font-weight:800;font-size:14px}
+.route-card .r-desc{font-size:12px;color:var(--dim);margin-bottom:12px}
+.route-card select{width:100%;height:38px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:0 10px;font-size:13px;outline:none;font-family:inherit}
+.route-card .r-bound{margin-top:10px}
+.pv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-bottom:80px}
+.pv-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;transition:.25s}
+.pv-card:hover{transform:translateY(-4px);border-color:var(--border-2)}
+.pv-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.pv-logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0}
+.pv-id{flex:1;min-width:0}
+.pv-name{font-weight:800;font-size:15px}
+.pv-sub{font-size:12px;color:var(--dim)}
+.pv-caprow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pc-cap{font-size:11px;padding:3px 9px;border-radius:7px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);color:#d8c8ff}
+.pc-cap.off{background:transparent;border-color:var(--border);color:var(--dim);opacity:.5}
+.pv-info{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.pv-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-models{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pc-model{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--card-2);border:1px solid var(--border);color:var(--muted)}
+.pv-actions{display:flex;gap:8px;flex-wrap:wrap}
+.a-field select{width:100%;height:46px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:0 14px;font-size:14px;outline:none;font-family:inherit;transition:.2s}
+.a-field select:focus{border-color:rgba(217,70,239,.5);box-shadow:0 0 0 3px rgba(217,70,239,.12)}
+@media(max-width:1080px){.route-grid{grid-template-columns:repeat(3,1fr)}.pv-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.route-grid{grid-template-columns:1fr}.pv-grid{grid-template-columns:1fr}}
+
 /* toast */
 #toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);z-index:300;background:rgba(18,18,31,.9);backdrop-filter:blur(12px);border:1px solid var(--border-2);color:var(--text);padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -514,6 +545,7 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
       <button data-view="studio" onclick="switchView('studio')">创作台</button>
       <button data-view="gallery" onclick="switchView('gallery')">作品库</button>
       <button data-view="data" onclick="switchView('data')">数据看板</button>
+      <button data-view="models" onclick="switchView('models')">模型服务</button>
       <button data-view="pricing" onclick="switchView('pricing')">定价</button>
     </div>
     <div class="nav-right" id="navAuth"></div>
@@ -786,6 +818,20 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
   </div>
 </main>
 
+<!-- ============ 模型服务 ============ -->
+<main id="view-models" class="view">
+  <div class="wrap">
+    <div class="page-head">
+      <div><h1>模型服务</h1><p>配置你自己的 API Key，支持官方 / 中转站 / OpenAI 兼容，按能力路由到创作流水线各阶段。</p></div>
+      <button class="btn btn-grad" onclick="openProviderModal()">＋ 添加供应商</button>
+    </div>
+    <div class="sec-label">🔀 能力路由 · 绑定到流水线各阶段</div>
+    <div class="route-grid" id="routeList"></div>
+    <div class="sec-label" style="margin-top:34px">🔌 供应商列表 · 密钥仅存于你的浏览器</div>
+    <div class="pv-grid" id="providerList"></div>
+  </div>
+</main>
+
 <!-- ============ 定价 ============ -->
 <main id="view-pricing" class="view">
   <div class="wrap">
@@ -910,6 +956,29 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
       <button class="btn btn-grad auth-btn" onclick="doRegister()">注 册</button>
       <div class="a-tip">注册即代表同意服务条款</div>
     </div>
+  </div>
+</div>
+
+<!-- ============ 供应商配置弹窗 ============ -->
+<div class="auth-modal" id="providerModal" onclick="if(event.target===this)closeProviderModal()">
+  <div class="auth-card" style="max-width:520px">
+    <div class="auth-head">
+      <div style="font-weight:800;font-size:16px">添加 / 编辑模型供应商</div>
+      <span class="auth-close" onclick="closeProviderModal()">✕</span>
+    </div>
+    <div class="a-field"><label>供应商预设</label><select id="pvPreset" onchange="presetChanged()"></select></div>
+    <div class="a-field"><label>API Key</label><input id="pvKey" placeholder="sk-... 或中转站密钥" /></div>
+    <div class="a-field"><label>API 地址（Base URL）</label><input id="pvBase" placeholder="https://api.xxx.com/v1" /></div>
+    <div class="a-field"><label>模型名称（逗号分隔）</label><input id="pvModels" placeholder="deepseek-chat, deepseek-reasoner" /></div>
+    <div class="a-field"><label>支持能力</label>
+      <div class="chips" id="pvCaps">
+        <button class="chip" data-cap="llm" onclick="toggleCap(this)">🧠 LLM 对话</button>
+        <button class="chip" data-cap="img" onclick="toggleCap(this)">🖼️ 生图</button>
+        <button class="chip" data-cap="video" onclick="toggleCap(this)">🎬 生视频</button>
+        <button class="chip" data-cap="tts" onclick="toggleCap(this)">🎙️ 配音</button>
+      </div>
+    </div>
+    <button class="btn btn-grad auth-btn" onclick="saveProvider()">保存供应商</button>
   </div>
 </div>
 
@@ -1335,7 +1404,7 @@ function imageStage(){
       <div class="g-body"><div class="g-name">${s.name} <span class="muted" style="font-size:11px">场景</span></div><div class="g-prompt">${s.prompt}</div></div>
     </div>`).join("");
   return `<div class="panel">
-    <h3><span class="ic">🖼️</span>人物与场景生成 <span class="model">GPT Image 2</span></h3>
+    <h3><span class="ic">🖼️</span>人物与场景生成 <span class="model">${routeProvider('img') ? routeProvider('img').name : 'GPT Image 2'}</span></h3>
     <p class="muted" style="font-size:13px;margin:-6px 0 16px">基于定稿剧本自动生成角色设定图与场景图，跨集保持一致性。</p>
     <div class="gen-sec"><h3>👤 角色设定</h3><div class="gen-grid">${chars}</div></div>
     <div class="gen-sec"><h3>🏞️ 场景设定</h3><div class="gen-grid">${scenes}</div></div>
@@ -1635,6 +1704,147 @@ function logout(){
   toast("已退出登录");
 }
 
+/* ================= 模型服务 ================= */
+const CAPS = { llm:{name:"LLM 对话",icon:"🧠"}, img:{name:"生图",icon:"🖼️"}, video:{name:"生视频",icon:"🎬"}, tts:{name:"配音",icon:"🎙️"} };
+const ROUTES = [
+  {key:"llm", name:"剧本创作 LLM", icon:"🧠", desc:"写剧本 · 扩写 · 润色"},
+  {key:"agents", name:"质检 Agent", icon:"🔍", desc:"多 Agent 剧本质检"},
+  {key:"img", name:"生图", icon:"🖼️", desc:"人物 · 场景生成"},
+  {key:"video", name:"生视频", icon:"🎬", desc:"动态漫 · 运镜"},
+  {key:"tts", name:"配音 TTS", icon:"🎙️", desc:"角色配音 · 旁白"},
+];
+const ROUTE_CAP = { llm:"llm", agents:"llm", img:"img", video:"video", tts:"tts" };
+let ROUTE_BINDING = { llm:"deepseek", agents:"deepseek", img:"openai", video:"kling", tts:"minimax" };
+const PROVIDERS = [
+  {id:"deepseek", name:"DeepSeek", brand:"#4d6bfe", type:"官方", key:"sk-deep****8f2a", base:"https://api.deepseek.com/v1", models:"deepseek-chat, deepseek-reasoner", caps:{llm:true,img:false,video:false,tts:false}},
+  {id:"openai", name:"OpenAI", brand:"#10a37f", type:"官方", key:"sk-proj****c9d1", base:"https://api.openai.com/v1", models:"gpt-4o, gpt-image-1, sora-2", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"anthropic", name:"Anthropic", brand:"#d97757", type:"官方", key:"", base:"https://api.anthropic.com", models:"claude-4-sonnet, claude-4-opus", caps:{llm:true,img:false,video:false,tts:false}},
+  {id:"google", name:"Google Gemini", brand:"#4285f4", type:"官方", key:"", base:"https://generativelanguage.googleapis.com", models:"gemini-2.5-pro, imagen-4, veo-3", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"qwen", name:"通义千问", brand:"#615ced", type:"官方", key:"", base:"https://dashscope.aliyuncs.com", models:"qwen-max, wan2.2, qwen-tts", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"zhipu", name:"智谱 GLM", brand:"#3859ff", type:"官方", key:"", base:"https://open.bigmodel.cn/api/paas/v4", models:"glm-4.5, cogview-4, cogvideox-3", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"kimi", name:"Moonshot Kimi", brand:"#16191d", type:"官方", key:"", base:"https://api.moonshot.cn/v1", models:"kimi-k2", caps:{llm:true,img:false,video:false,tts:false}},
+  {id:"volc", name:"豆包 · 火山引擎", brand:"#325ab4", type:"官方", key:"", base:"https://ark.cn-beijing.volces.com/api/v3", models:"doubao-pro, seedream-4, seedance-1.5", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"minimax", name:"MiniMax", brand:"#ff4d4f", type:"官方", key:"mm-****9a3c", base:"https://api.minimax.chat/v1", models:"abab-6.5s, hailuo-02, speech-02", caps:{llm:true,img:true,video:true,tts:true}},
+  {id:"kling", name:"可灵 Kling", brand:"#00d4aa", type:"官方", key:"kl-****3b7e", base:"https://api.klingai.com", models:"kling-2.1, kling-image", caps:{llm:false,img:true,video:true,tts:false}},
+  {id:"jimeng", name:"即梦 Jimeng", brand:"#ff6b6b", type:"官方", key:"", base:"https://api.jimeng.ai", models:"jimeng-3.1", caps:{llm:false,img:true,video:true,tts:false}},
+  {id:"runway", name:"Runway", brand:"#00ff87", type:"官方", key:"", base:"https://api.runwayml.com", models:"gen-4", caps:{llm:false,img:true,video:true,tts:false}},
+  {id:"stepfun", name:"阶跃星辰", brand:"#5b67ff", type:"官方", key:"", base:"https://api.stepfun.com/v1", models:"step-2, step-video-t2v", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"silicon", name:"硅基流动", brand:"#7c3aed", type:"中转站", key:"sk-sil****1e9f", base:"https://api.siliconflow.cn/v1", models:"deepseek-v3, qwen3, flux.1, kling", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"openrouter", name:"OpenRouter", brand:"#71717a", type:"中转站", key:"", base:"https://openrouter.ai/api/v1", models:"多模型聚合", caps:{llm:true,img:true,video:true,tts:false}},
+  {id:"custom", name:"自定义 OpenAI 兼容", brand:"#8b5cf6", type:"中转站", key:"", base:"https://your-relay.example.com/v1", models:"自定义模型", caps:{llm:true,img:true,video:true,tts:true}},
+];
+function routeProvider(key){ return PROVIDERS.find(p=>p.id===ROUTE_BINDING[key]); }
+function maskKey(k){ return k.length<=8 ? k : k.slice(0,6) + "****" + k.slice(-4); }
+function providerCard(p){
+  const capBadges = Object.keys(CAPS).map(k=>`<span class="pc-cap ${p.caps[k]?'':'off'}">${CAPS[k].icon} ${CAPS[k].name}</span>`).join("");
+  const models = p.models.split(",").map(m=>`<span class="pc-model">${m.trim()}</span>`).join("");
+  const hasKey = !!p.key;
+  return `<div class="pv-card">
+    <div class="pv-head">
+      <span class="pv-logo" style="background:${p.brand}">${p.name[0]}</span>
+      <div class="pv-id"><div class="pv-name">${p.name}</div><div class="pv-sub">${p.type}${hasKey ? ' · 已配置' : ''}</div></div>
+      <span class="status-badge ${hasKey?'green':'gray'}">${hasKey?'已连接':'未配置'}</span>
+    </div>
+    <div class="pv-caprow">${capBadges}</div>
+    <div class="pv-info">
+      <div class="pv-line">🔑 ${hasKey ? p.key : '未填写 API Key'}</div>
+      <div class="pv-line">🌐 ${p.base}</div>
+      <div class="pv-models">${models}</div>
+    </div>
+    <div class="pv-actions">
+      ${hasKey ? `<button class="mini-btn" onclick="testProvider('${p.id}')">🔌 测试连接</button>` : ''}
+      <button class="mini-btn" onclick="openProviderModal('${p.id}')">${hasKey?'编辑':'配置'}</button>
+      ${p.name.indexOf('自建')>-1 ? `<button class="mini-btn" style="color:var(--rose)" onclick="deleteProvider('${p.id}')">删除</button>` : ''}
+    </div>
+  </div>`;
+}
+function renderModels(){
+  document.getElementById("routeList").innerHTML = ROUTES.map(r=>{
+    const bound = routeProvider(r.key);
+    const cap = ROUTE_CAP[r.key];
+    const opts = PROVIDERS.filter(p=>p.caps[cap]).map(p=>`<option value="${p.id}" ${p.id===ROUTE_BINDING[r.key]?'selected':''}>${p.name}</option>`).join("");
+    return `<div class="route-card">
+      <div class="r-ico">${r.icon}</div>
+      <div class="r-name">${r.name}</div>
+      <div class="r-desc">${r.desc}</div>
+      <select onchange="routeChange('${r.key}',this.value)">${opts}</select>
+      <div class="r-bound"><span class="status-badge ${bound?'green':'gray'}">${bound?'已绑定':'未绑定'}</span></div>
+    </div>`;
+  }).join("");
+  document.getElementById("providerList").innerHTML = PROVIDERS.map(providerCard).join("");
+}
+function routeChange(key, val){
+  ROUTE_BINDING[key] = val;
+  const r = ROUTES.find(x=>x.key===key);
+  const p = PROVIDERS.find(x=>x.id===val);
+  toast((r?r.name:key) + " 已绑定 → " + (p?p.name:val));
+  renderModels();
+}
+function testProvider(id){
+  const p = PROVIDERS.find(x=>x.id===id);
+  if(!p) return;
+  toast(p.name + " 连接测试中…");
+  setTimeout(function(){ toast("✓ " + p.name + " 连接成功 · 延迟 " + (40+Math.floor(Math.random()*160)) + "ms"); }, 900);
+}
+let editingProvider = null;
+function openProviderModal(id){
+  editingProvider = id || null;
+  const sel = document.getElementById("pvPreset");
+  sel.innerHTML = PROVIDERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+  if(id){ sel.value = id; } else { sel.value = "custom"; }
+  const p = id ? PROVIDERS.find(x=>x.id===id) : {base:"", models:"", caps:{llm:false,img:false,video:false,tts:false}};
+  document.getElementById("pvKey").value = "";
+  document.getElementById("pvKey").placeholder = id ? "留空则保持原 Key 不变" : "sk-... 或中转站密钥";
+  document.getElementById("pvBase").value = p.base || "";
+  document.getElementById("pvModels").value = p.models || "";
+  document.querySelectorAll("#pvCaps .chip").forEach(ch=>ch.classList.toggle("on", !!p.caps[ch.dataset.cap]));
+  document.getElementById("providerModal").classList.add("show");
+  presetChanged();
+}
+function closeProviderModal(){ document.getElementById("providerModal").classList.remove("show"); }
+function presetChanged(){
+  const id = document.getElementById("pvPreset").value;
+  const p = PROVIDERS.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById("pvBase").value = p.base;
+  document.getElementById("pvModels").value = p.models;
+  document.querySelectorAll("#pvCaps .chip").forEach(ch=>ch.classList.toggle("on", !!p.caps[ch.dataset.cap]));
+}
+function toggleCap(el){ el.classList.toggle("on"); }
+function saveProvider(){
+  const preset = document.getElementById("pvPreset").value;
+  const key = document.getElementById("pvKey").value.trim();
+  const base = document.getElementById("pvBase").value.trim();
+  const models = document.getElementById("pvModels").value.trim();
+  const caps = {};
+  document.querySelectorAll("#pvCaps .chip").forEach(ch=>{ caps[ch.dataset.cap] = ch.classList.contains("on"); });
+  let p;
+  if(editingProvider){
+    p = PROVIDERS.find(x=>x.id===editingProvider);
+  } else {
+    p = PROVIDERS.find(x=>x.id===preset);
+    if(!p){
+      const src = PROVIDERS.find(x=>x.id===preset) || {name:"自定义", brand:"#8b5cf6", type:"中转站"};
+      p = {id: preset + "-" + Date.now(), name: (src.name||"自定义") + "（自建）", brand: src.brand || "#8b5cf6", type: src.type || "中转站", key:"", caps:{}};
+      PROVIDERS.push(p);
+    }
+  }
+  if(!p) return;
+  if(base) p.base = base;
+  if(models) p.models = models;
+  p.caps = caps;
+  if(key) p.key = maskKey(key);
+  closeProviderModal();
+  renderModels();
+  toast("供应商已保存 ✓");
+}
+function deleteProvider(id){
+  PROVIDERS.splice(PROVIDERS.findIndex(x=>x.id===id), 1);
+  Object.keys(ROUTE_BINDING).forEach(k=>{ if(ROUTE_BINDING[k]===id) ROUTE_BINDING[k] = "deepseek"; });
+  renderModels();
+  toast("供应商已删除");
+}
+
 /* ================= 视图切换 ================= */
 function switchView(name){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
@@ -1696,6 +1906,7 @@ renderPipeline();
 initPreviewCards();
 resetPipeline();
 renderNavAuth();
+renderModels();
 
 /* 滚动渐显 */
 const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.style.opacity="1";e.target.style.transform="none";io.unobserve(e.target)}})},{threshold:.08});
