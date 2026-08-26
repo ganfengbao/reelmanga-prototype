@@ -1,5 +1,6 @@
 # 浏览器自动化/调试产物
 .playwright-cli/
+output/
 
 # 系统文件
 Thumbs.db
