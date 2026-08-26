@@ -500,12 +500,26 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
 .hide{display:none!important}
 .mt16{margin-top:16px}
 
+/* ============ 移动端菜单 ============ */
+.nav-burger{display:none;width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--border);flex-direction:column;align-items:center;justify-content:center;gap:5px;margin-left:auto}
+.nav-burger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+.nav-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-burger.open span:nth-child(2){opacity:0}
+.nav-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;border-top:1px solid var(--border);background:rgba(10,10,18,.98);padding:14px 16px 20px;max-height:calc(100vh - 60px);overflow-y:auto}
+.mobile-menu.show{display:block}
+.mm-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mm-links button{padding:13px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:14px;font-weight:700;color:var(--muted);text-align:left;transition:.15s}
+.mm-links button.on{color:var(--text);background:rgba(217,70,239,.14);border-color:rgba(217,70,239,.4)}
+.mm-auth{display:flex;gap:10px;margin-top:12px;padding-top:14px;border-top:1px solid var(--border)}
+.mm-auth .btn{flex:1}
+
 /* ============ 响应式 ============ */
 @media(max-width:1080px){
   .features,.styles{grid-template-columns:repeat(2,1fr)}
   .reel-grid,.gallery-grid{grid-template-columns:repeat(4,1fr)}
   .studio-body{grid-template-columns:1fr}
-  .preview-panel{position:static;max-width:420px}
+  .preview-panel{position:static;max-width:420px;margin:0 auto;width:100%}
   .proj-grid{grid-template-columns:repeat(2,1fr)}
   .gen-grid{grid-template-columns:repeat(2,1fr)}
   .data-grid{grid-template-columns:1fr}
@@ -513,18 +527,64 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
   .checks{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr 1fr 1fr}
 }
-@media(max-width:720px){
+@media(max-width:820px){
+  .wrap{padding:0 16px}
+  .nav-in{height:60px;padding:0 16px;gap:12px}
   .nav-links{display:none}
-  .stats,.data-stats{grid-template-columns:repeat(2,1fr)}
+  .nav-right{display:none}
+  .nav-burger{display:flex}
+  .view{padding-top:60px}
+  .hero{padding:30px 0 10px}
+  .hero h1{font-size:clamp(29px,8.5vw,42px);margin-bottom:16px}
+  .hero .sub{font-size:15px;margin-bottom:24px}
+  .hero-cta{flex-direction:column;width:100%;margin-bottom:28px}
+  .hero-cta .btn-xl{width:100%;padding:15px 20px;font-size:15px}
+  .magic{margin-bottom:40px}
+  .magic-bar{flex-wrap:wrap;padding:14px}
+  .magic-bar textarea{width:100%;min-height:60px;height:auto}
+  .magic-bar .mic{display:none}
+  .magic-bar .btn{width:100%}
+  .stats,.data-stats{grid-template-columns:repeat(2,1fr);gap:12px}
+  .stat{padding:18px 8px}
+  .stat .num{font-size:26px}
+  .section{padding:44px 0}
+  .sec-head{margin-bottom:28px}
+  .sec-head h2{font-size:28px}
   .features,.styles,.steps,.quotes,.plans,.proj-grid{grid-template-columns:1fr}
-  .reel-grid,.gallery-grid{grid-template-columns:repeat(3,1fr)}
+  .reel-grid,.gallery-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .reel .title{font-size:13px}
+  .reel .meta{font-size:11px}
   .step .arrow{display:none}
-  .stage{height:300px}
-  .pcard{width:150px}
-  .pcard.p2{width:168px}
+  .stage{height:260px}
+  .pcard{width:128px}
+  .pcard.p2{width:142px}
+  .cta-banner{padding:42px 20px}
+  .stg{min-width:90px}
+  .stg .node{width:34px;height:34px;font-size:14px}
+  .stg .stg-name{font-size:11px}
+  .studio-head{flex-direction:column;align-items:flex-start}
+  .studio-head .proj-title{font-size:20px}
+  .studio-head>div:last-child{width:100%}
+  .studio-head>div:last-child .btn{flex:1}
+  .prompt-card{flex-direction:column}
+  .agent .a-head{flex-wrap:wrap}
+  .agent .a-score{margin-left:0;width:100%;text-align:right}
+  .gen-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pv-controls{flex-wrap:wrap}
+  .auth-card{padding:22px 18px}
+  .auth-modal{padding:16px}
+  .a-social{grid-template-columns:repeat(4,1fr)}
   .foot-grid{grid-template-columns:1fr 1fr}
-  .player-box{flex-direction:column;align-items:center}
-  .player-side{flex-direction:row;width:auto}
+  .chart-card{overflow-x:auto}
+  .plat-table{min-width:460px}
+  .data-grid{gap:14px}
+  .bill-toggle .save{display:none}
+  .proj-grid .proj-new{min-height:200px}
+  .player-modal{padding:0;align-items:flex-start;overflow-y:auto}
+  .player-box{flex-direction:column;gap:0;width:100%;max-width:100%;align-items:center}
+  .player-main{width:100%;max-width:480px;height:auto;aspect-ratio:9/16;border-radius:0 0 20px 20px}
+  .player-side{flex-direction:row;width:100%;max-width:480px;justify-content:space-between;padding:12px 16px;gap:8px}
+  .p-act{flex:1;padding:10px 6px;gap:3px}
 }
 </style>
 </head>
@@ -549,6 +609,19 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
       <button data-view="pricing" onclick="switchView('pricing')">定价</button>
     </div>
     <div class="nav-right" id="navAuth"></div>
+    <button class="nav-burger" id="navBurger" onclick="toggleMobileMenu()" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mm-links">
+      <button class="on" data-view="home" onclick="mmNav('home')">🏠 首页</button>
+      <button data-view="projects" onclick="mmNav('projects')">📁 项目中心</button>
+      <button data-view="studio" onclick="mmNav('studio')">⚡ 创作台</button>
+      <button data-view="gallery" onclick="mmNav('gallery')">🎬 作品库</button>
+      <button data-view="data" onclick="mmNav('data')">📊 数据看板</button>
+      <button data-view="models" onclick="mmNav('models')">🔌 模型服务</button>
+      <button data-view="pricing" onclick="mmNav('pricing')">💎 定价</button>
+    </div>
+    <div class="mm-auth" id="mobileAuth"></div>
   </div>
 </nav>
 
@@ -1655,6 +1728,12 @@ function renderNavAuth(){
       <button class="btn btn-ghost" onclick="openAuth('register')">注册</button>
       <button class="btn btn-grad" onclick="switchView('studio')">⚡ 开始创作</button>`;
   }
+  const mm = document.getElementById("mobileAuth");
+  if(mm){
+    mm.innerHTML = u ?
+      `<button class="btn btn-ghost" onclick="switchView('projects');closeMobileMenu();return false;">📁 我的项目</button><button class="btn btn-ghost" onclick="logout();return false;">🚪 退出（${u.name}）</button>` :
+      `<button class="btn btn-ghost" onclick="openAuth('login');closeMobileMenu();return false;">登录</button><button class="btn btn-grad" onclick="openAuth('register');closeMobileMenu();return false;">注册</button>`;
+  }
 }
 function toggleUserMenu(e){ e.stopPropagation(); const d = document.getElementById("uDrop"); if(d) d.classList.toggle("show"); }
 function closeUserMenu(){ const d = document.getElementById("uDrop"); if(d) d.classList.remove("show"); }
@@ -1867,8 +1946,23 @@ function switchView(name){
   const el = document.getElementById("view-"+name);
   if(el) el.classList.add("active");
   document.querySelectorAll(".nav-links button").forEach(b=>b.classList.toggle("active", b.dataset.view===name));
+  document.querySelectorAll(".mm-links button").forEach(b=>b.classList.toggle("on", b.dataset.view===name));
+  closeMobileMenu();
   window.scrollTo({top:0, behavior:"smooth"});
 }
+function toggleMobileMenu(){
+  const m = document.getElementById("mobileMenu");
+  const b = document.getElementById("navBurger");
+  m.classList.toggle("show");
+  if(b) b.classList.toggle("open", m.classList.contains("show"));
+}
+function closeMobileMenu(){
+  const m = document.getElementById("mobileMenu");
+  if(m) m.classList.remove("show");
+  const b = document.getElementById("navBurger");
+  if(b) b.classList.remove("open");
+}
+function mmNav(name){ switchView(name); }
 function heroGenerate(){
   switchView("studio");
   const v = document.getElementById("heroInput").value.trim();
