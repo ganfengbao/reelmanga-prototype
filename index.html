@@ -1022,11 +1022,27 @@ const CHARACTERS = {
 };
 
 const SCENES = {
-  "寝殿": {g:"linear-gradient(160deg,#7dd3fc 0%,#1e3a8a 100%)"},
-  "大堂": {g:"linear-gradient(160deg,#fbbf24 0%,#7c2d12 100%)"},
-  "庭院": {g:"linear-gradient(160deg,#2dd4bf 0%,#134e4a 100%)"},
-  "皇城": {g:"linear-gradient(160deg,#a855f7 0%,#1e1b4b 100%)"},
+  "寝殿": {file:"bed"},
+  "大堂": {file:"hall"},
+  "庭院": {file:"garden"},
+  "皇城": {file:"city"},
 };
+const IMG_CHAR = "images/characters/";
+const IMG_SCENE = "images/scenes/";
+const REEL_CHAR = { girl:"sunian", couple:"qunxiang", sword:"fanpai", boy:"wangye" };
+const GENRE_SCENE = { "古风仙侠":"city", "都市甜宠":"hall", "玄幻修真":"city", "系统逆袭":"garden", "悬疑惊悚":"bed", "穿越重生":"garden", "豪门商战":"hall", "热血少年":"city" };
+function sceneFile(name){ return (SCENES[name] && SCENES[name].file) || "hall"; }
+function imgFallback(el, kind, key){
+  if(kind === "char"){ const c = CHARACTERS[key] || CHARACTERS.sunian; el.outerHTML = charSVG(c.silo, c.accent); }
+  else { el.style.display = "none"; }
+}
+function charImg(key){
+  const c = CHARACTERS[key] || CHARACTERS.sunian;
+  return `<img src="${IMG_CHAR}${key}.png" alt="${c.name}" onerror="imgFallback(this,'char','${key}')" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:72%;height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5))">`;
+}
+function sceneImg(file){
+  return `<img src="${IMG_SCENE}${file}.png" alt="场景" onerror="imgFallback(this,'scene')" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
+}
 
 const EMOTIONS = {震惊:"#f87171",傲慢:"#fbbf24",冷笑:"#22d3ee",决绝:"#fb923c",冷静:"#60a5fa",坚定:"#f472b6",深沉:"#818cf8",微笑:"#fb7185",定格:"#a78bfa"};
 const CAMERAS = ["特写","中景","全景","远景","推近"];
@@ -1142,8 +1158,9 @@ const STYLES = [
 
 /* ================= 渲染工具 ================= */
 function thumbHTML(reel){
-  const gr = GENRES[reel.g] || GENRES["古风仙侠"];
-  return `<div class="thumb" style="background:${gr.g}"><div class="ht"></div><div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:${gr.a};opacity:.25;filter:blur(30px)"></div>${charSVG(reel.c, gr.a)}</div>`;
+  const scene = GENRE_SCENE[reel.g] || "hall";
+  const ch = REEL_CHAR[reel.c] || "sunian";
+  return `<div class="thumb" style="background:#14141f">${sceneImg(scene)}${charImg(ch)}</div>`;
 }
 function reelHTML(reel){
   return `<div class="reel" onclick="openPlayer()">
@@ -1165,7 +1182,7 @@ function renderGallery(filter){
 function renderStyles(){
   document.getElementById("styleList").innerHTML = STYLES.map(s=>`
     <div class="style-card" onclick="switchView('studio')">
-      <div class="sc-bg" style="background:${s.g}"><div class="ht"></div>${charSVG(s.c, s.a)}</div>
+      <div class="sc-bg" style="background:${s.g}"><div class="ht"></div></div>
       <div class="sc-veil"></div><span class="sc-en">${s.en}</span><span class="sc-name">${s.n}</span>
     </div>`).join("");
 }
@@ -1180,7 +1197,7 @@ function renderProjects(){
     PROJECTS.map(p=>{
       const gr = GENRES[p.genre];
       return `<div class="proj">
-        <div class="cover"><div class="cbg" style="background:${gr.g}"><div class="ht"></div>${charSVG(p.c, gr.a)}</div><div class="proj-status">${statusBadge(p.status)}</div></div>
+        <div class="cover"><div class="cbg" style="background:#14141f">${sceneImg(GENRE_SCENE[p.genre]||"hall")}${charImg(REEL_CHAR[p.c]||"sunian")}</div><div class="proj-status">${statusBadge(p.status)}</div></div>
         <div class="body">
           <div class="p-title">《${p.title}》</div>
           <div class="p-meta"><span>📺 ${p.eps} 集</span><span>👁 ${p.plays}</span><span>💰 ${p.earn}</span><span>🕒 ${p.up}</span></div>
@@ -1215,16 +1232,15 @@ function newProject(){
 function frameHTML(shot, opts){
   opts = opts||{};
   const ch = CHARACTERS[shot.speaker] || CHARACTERS.sunian;
-  const sc = SCENES[shot.scene] || SCENES["大堂"];
   const emo = EMOTIONS[shot.emotion] || "#a78bfa";
   const sub = opts.sub === false ? "" :
     `<div class="f-sub"><span class="f-speaker">${ch.name} · ${shot.emotion}</span><span class="f-text">${shot.dialogue}</span></div>`;
-  return `<div style="position:absolute;inset:0;background:${sc.g}">
-    <div class="ht"></div>
-    <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:${emo};opacity:.28;filter:blur(36px)"></div>
+  return `<div style="position:absolute;inset:0;background:#14141f">
+    ${sceneImg(sceneFile(shot.scene))}
+    <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:${emo};opacity:.25;filter:blur(36px)"></div>
     <span class="f-scene">${shot.scene}</span>
     <span class="f-cam">${shot.camera}</span>
-    ${charSVG(ch.silo, ch.accent)}
+    ${charImg(shot.speaker)}
     ${sub}
   </div>`;
 }
@@ -1395,12 +1411,12 @@ function pcheckStage(){
 function imageStage(){
   const chars = CHAR_IMAGES.map(c=>`
     <div class="gen-card">
-      <div class="g-img"><div class="gbg" style="background:linear-gradient(160deg,#1a1a2e,#0e0e1a)"><div class="ht"></div>${charSVG(c.silo, c.accent)}</div><span class="g-tag"><span class="status-badge green">已生成</span></span></div>
+      <div class="g-img"><div class="gbg" style="background:#12121f">${charImg(c.key)}</div><span class="g-tag"><span class="status-badge green">已生成</span></span></div>
       <div class="g-body"><div class="g-name">${c.name} <span class="muted" style="font-size:11px">${c.role}</span></div><div class="g-prompt">${c.prompt}</div></div>
     </div>`).join("");
   const scenes = SCENE_IMAGES.map(s=>`
     <div class="gen-card">
-      <div class="g-img"><div class="gbg" style="background:${s.g}"><div class="ht"></div></div><span class="g-tag"><span class="status-badge green">已生成</span></span></div>
+      <div class="g-img"><div class="gbg" style="background:#12121f">${sceneImg(s.key)}</div><span class="g-tag"><span class="status-badge green">已生成</span></span></div>
       <div class="g-body"><div class="g-name">${s.name} <span class="muted" style="font-size:11px">场景</span></div><div class="g-prompt">${s.prompt}</div></div>
     </div>`).join("");
   return `<div class="panel">
@@ -1496,7 +1512,7 @@ function animateAgents(cb){
 let pvIndex = 0, pvTimer = null, pvRemain = 0, pvElapsed = 0, pvTotal = 0;
 function renderBoard(){
   document.getElementById("timeline").innerHTML = SHOTS.map((s,i)=>
-    `<div class="tl-item" id="tl-${i}" onclick="selectShot(${i})"><div style="position:absolute;inset:0;background:${SCENES[s.scene].g}">${charSVG(CHARACTERS[s.speaker].silo, CHARACTERS[s.speaker].accent)}</div><span class="n">${i+1}</span></div>`
+    `<div class="tl-item" id="tl-${i}" onclick="selectShot(${i})"><div style="position:absolute;inset:0;background:#14141f">${sceneImg(sceneFile(s.scene))}${charImg(s.speaker)}</div><span class="n">${i+1}</span></div>`
   ).join("");
 }
 function selectShot(i){
@@ -1893,10 +1909,9 @@ document.getElementById("gTabs").addEventListener("click",e=>{
 
 /* ================= 启动 ================= */
 function initPreviewCards(){
-  const pc = [["重生之凤逆天下","girl","#f0abfc"],["甜宠隐婚","couple","#fda4af"],["仙帝归来","sword","#c4b5fd"],["王妃是神医","girl","#f0abfc"]];
+  const pc = [["重生之凤逆天下","sunian","city"],["甜宠隐婚","qunxiang","hall"],["仙帝归来","fanpai","city"],["王妃是神医","sunian","garden"]];
   pc.forEach((p,i)=>{
-    const g = [GENRES["穿越重生"],GENRES["都市甜宠"],GENRES["玄幻修真"],GENRES["穿越重生"]][i];
-    document.getElementById("pc"+(i+1)).innerHTML = `<div style="position:absolute;inset:0;background:${g.g}"><div class="ht"></div>${charSVG(p[1], p[2])}<div class="veil"></div><div class="info" style="position:absolute;left:12px;right:12px;bottom:12px;z-index:3"><div style="font-weight:800;font-size:13px">《${p[0]}》</div></div></div>`;
+    document.getElementById("pc"+(i+1)).innerHTML = `<div style="position:absolute;inset:0;background:#14141f">${sceneImg(p[2])}${charImg(p[1])}<div class="veil"></div><div class="info" style="position:absolute;left:12px;right:12px;bottom:12px;z-index:3"><div style="font-weight:800;font-size:13px">《${p[0]}》</div></div></div>`;
   });
 }
 renderStyles();
