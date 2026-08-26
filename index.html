@@ -411,6 +411,54 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
 .plan{transition:.3s}
 .plan:hover{transform:translateY(-6px);border-color:var(--border-2)}
 
+/* ============ 登录 / 注册 ============ */
+.auth-modal{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(4,4,10,.82);backdrop-filter:blur(14px)}
+.auth-modal.show{display:flex;animation:viewIn .3s ease}
+.auth-card{width:100%;max-width:420px;border-radius:22px;background:var(--bg-2);border:1px solid var(--border-2);padding:28px;position:relative;box-shadow:var(--shadow)}
+.auth-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.auth-tabs{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px}
+.auth-tabs button{padding:9px 24px;border-radius:9px;font-size:14px;font-weight:800;color:var(--muted);transition:.2s}
+.auth-tabs button.on{background:var(--card-2);color:var(--text)}
+.auth-close{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--card-2);color:var(--muted);font-size:15px;transition:.2s}
+.auth-close:hover{color:var(--text)}
+.a-field{margin-bottom:16px}
+.a-field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.a-field input{width:100%;height:46px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:0 14px;font-family:inherit;font-size:14px;outline:none;transition:.2s}
+.a-field input:focus{border-color:rgba(217,70,239,.5);box-shadow:0 0 0 3px rgba(217,70,239,.12)}
+.a-code{display:flex;gap:10px}
+.a-code input{flex:1}
+.a-code button{flex-shrink:0;padding:0 15px;height:46px;border-radius:12px;font-size:13px;font-weight:700;background:var(--card-2);border:1px solid var(--border);color:var(--text);transition:.2s}
+.a-code button:disabled{opacity:.5}
+.a-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:13px}
+.a-check{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;cursor:pointer}
+.a-check input{accent-color:var(--fuchsia);width:15px;height:15px}
+.a-row a{color:var(--cyan)}
+.auth-btn{width:100%;padding:14px;font-size:15px;border-radius:13px}
+.a-divider{display:flex;align-items:center;gap:12px;margin:20px 0 16px;color:var(--dim);font-size:12px}
+.a-divider::before,.a-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.a-social{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.a-social button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);transition:.2s}
+.a-social button:hover{color:var(--text);border-color:var(--border-2);transform:translateY(-2px)}
+.a-social button span{font-size:18px}
+.a-tip{margin-top:16px;text-align:center;font-size:12px;color:var(--dim)}
+/* 用户菜单 */
+.user-menu{position:relative}
+.user-chip{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 6px;border-radius:99px;background:var(--card);border:1px solid var(--border);transition:.2s}
+.user-chip:hover{border-color:var(--border-2)}
+.u-avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.u-name{font-size:13.5px;font-weight:700}
+.u-caret{font-size:10px;color:var(--muted)}
+.u-drop{position:absolute;top:calc(100% + 10px);right:0;width:230px;background:var(--bg-2);border:1px solid var(--border-2);border-radius:16px;padding:8px;box-shadow:var(--shadow);display:none;z-index:130}
+.u-drop.show{display:block;animation:viewIn .2s ease}
+.u-drop-head{display:flex;align-items:center;gap:11px;padding:10px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.u-drop-head .u-avatar{width:40px;height:40px;font-size:17px}
+.u-drop-head b{display:block;font-size:14.5px}
+.u-drop-head span{font-size:12px;color:var(--dim)}
+.u-drop a{display:block;padding:10px 12px;border-radius:10px;font-size:13.5px;color:var(--muted);transition:.15s}
+.u-drop a:hover{color:var(--text);background:var(--card-2)}
+.u-drop .u-drop-line{height:1px;background:var(--border);margin:6px 0}
+.u-drop .u-logout{color:var(--rose)}
+
 /* toast */
 #toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);z-index:300;background:rgba(18,18,31,.9);backdrop-filter:blur(12px);border:1px solid var(--border-2);color:var(--text);padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -468,10 +516,7 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
       <button data-view="data" onclick="switchView('data')">数据看板</button>
       <button data-view="pricing" onclick="switchView('pricing')">定价</button>
     </div>
-    <div class="nav-right">
-      <button class="btn btn-ghost">登录</button>
-      <button class="btn btn-grad" onclick="switchView('studio')">⚡ 开始创作</button>
-    </div>
+    <div class="nav-right" id="navAuth"></div>
   </div>
 </nav>
 
@@ -821,6 +866,49 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
       <div class="p-act"><span class="a-ic">💬</span><b>860</b></div>
       <div class="p-act"><span class="a-ic">↗</span><b>分享</b></div>
       <div class="p-act"><span class="a-ic">⬇</span><b>下载</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 登录 / 注册弹窗 ============ -->
+<div class="auth-modal" id="authModal" onclick="if(event.target===this)closeAuth()">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="auth-tabs">
+        <button class="on" id="tabLogin" onclick="switchAuthTab('login')">登录</button>
+        <button id="tabRegister" onclick="switchAuthTab('register')">注册</button>
+      </div>
+      <span class="auth-close" onclick="closeAuth()">✕</span>
+    </div>
+
+    <!-- 登录 -->
+    <div id="authLogin">
+      <div class="a-field"><label>手机号 / 邮箱</label><input id="loginAccount" placeholder="请输入手机号或邮箱" /></div>
+      <div class="a-field"><label>密码</label><input id="loginPass" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+      <div class="a-row">
+        <label class="a-check"><input type="checkbox" checked /> 记住我</label>
+        <a href="#" onclick="toast('原型演示：请联系管理员重置密码');return false;">忘记密码？</a>
+      </div>
+      <button class="btn btn-grad auth-btn" onclick="doLogin()">登 录</button>
+      <div class="a-divider"><span>或使用以下方式登录</span></div>
+      <div class="a-social">
+        <button onclick="socialLogin('微信')"><span>💬</span>微信</button>
+        <button onclick="socialLogin('手机')"><span>📱</span>手机号</button>
+        <button onclick="socialLogin('Apple')"><span>🍎</span>Apple</button>
+        <button onclick="socialLogin('Google')"><span>🌐</span>Google</button>
+      </div>
+      <div class="a-tip">演示账号：13800138000 / 123456</div>
+    </div>
+
+    <!-- 注册 -->
+    <div id="authRegister" class="hide">
+      <div class="a-field"><label>手机号</label><input id="regPhone" placeholder="请输入 11 位手机号" /></div>
+      <div class="a-field a-code"><label style="display:block;width:100%">验证码</label><input id="regCode" placeholder="6 位验证码" /><button id="codeBtn" onclick="sendCode()">获取验证码</button></div>
+      <div class="a-field"><label>设置密码</label><input id="regPass" type="password" placeholder="至少 6 位密码" /></div>
+      <div class="a-field"><label>确认密码</label><input id="regPass2" type="password" placeholder="再次输入密码" /></div>
+      <label class="a-check" style="margin-bottom:16px"><input type="checkbox" id="regAgree" checked /> 我已阅读并同意《用户协议》与《隐私政策》</label>
+      <button class="btn btn-grad auth-btn" onclick="doRegister()">注 册</button>
+      <div class="a-tip">注册即代表同意服务条款</div>
     </div>
   </div>
 </div>
@@ -1440,6 +1528,113 @@ function updatePlayerUI(){
   document.getElementById("playerTime").textContent = fmt(plElapsed) + " / " + fmt(plTotal);
 }
 
+/* ================= 登录 / 注册（模拟） ================= */
+const AUTH_KEY = "rm_user";
+const USERS_KEY = "rm_users";
+function saveUsers(u){ try{ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }catch(e){} }
+function getUsers(){
+  let u = {};
+  try { u = JSON.parse(localStorage.getItem(USERS_KEY) || "null") || {}; } catch(e){}
+  if(!u["13800138000"]){ u["13800138000"] = {phone:"13800138000", name:"苏念", pwd:"123456", avatar:"苏"}; saveUsers(u); }
+  return u;
+}
+function currentUser(){ try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); } catch(e){ return null; } }
+function setCurrentUser(u){ try { u ? localStorage.setItem(AUTH_KEY, JSON.stringify(u)) : localStorage.removeItem(AUTH_KEY); } catch(e){} renderNavAuth(); }
+
+function renderNavAuth(){
+  const u = currentUser();
+  const el = document.getElementById("navAuth");
+  if(!el) return;
+  if(u){
+    const av = u.avatar || (u.name || "U")[0];
+    el.innerHTML = `
+      <div class="user-menu">
+        <button class="user-chip" onclick="toggleUserMenu(event)">
+          <span class="u-avatar">${av}</span>
+          <span class="u-name">${u.name}</span>
+          <span class="u-caret">▾</span>
+        </button>
+        <div class="u-drop" id="uDrop">
+          <div class="u-drop-head"><span class="u-avatar">${av}</span><div><b>${u.name}</b><span>${u.phone}</span></div></div>
+          <a href="#" onclick="switchView('projects');closeUserMenu();return false;">📁 我的项目</a>
+          <a href="#" onclick="switchView('data');closeUserMenu();return false;">📊 数据看板</a>
+          <a href="#" onclick="switchView('studio');closeUserMenu();return false;">⚡ 开始创作</a>
+          <div class="u-drop-line"></div>
+          <a href="#" class="u-logout" onclick="logout();return false;">🚪 退出登录</a>
+        </div>
+      </div>
+      <button class="btn btn-grad" onclick="switchView('studio')">⚡ 开始创作</button>`;
+  } else {
+    el.innerHTML = `
+      <button class="btn btn-ghost" onclick="openAuth('login')">登录</button>
+      <button class="btn btn-ghost" onclick="openAuth('register')">注册</button>
+      <button class="btn btn-grad" onclick="switchView('studio')">⚡ 开始创作</button>`;
+  }
+}
+function toggleUserMenu(e){ e.stopPropagation(); const d = document.getElementById("uDrop"); if(d) d.classList.toggle("show"); }
+function closeUserMenu(){ const d = document.getElementById("uDrop"); if(d) d.classList.remove("show"); }
+document.addEventListener("click", function(){ closeUserMenu(); });
+
+function openAuth(tab){ document.getElementById("authModal").classList.add("show"); switchAuthTab(tab || "login"); }
+function closeAuth(){ document.getElementById("authModal").classList.remove("show"); }
+function switchAuthTab(tab){
+  document.getElementById("tabLogin").classList.toggle("on", tab === "login");
+  document.getElementById("tabRegister").classList.toggle("on", tab === "register");
+  document.getElementById("authLogin").classList.toggle("hide", tab !== "login");
+  document.getElementById("authRegister").classList.toggle("hide", tab !== "register");
+}
+function doLogin(){
+  const acc = document.getElementById("loginAccount").value.trim();
+  const pwd = document.getElementById("loginPass").value;
+  if(!acc || !pwd){ toast("请输入账号和密码"); return; }
+  const users = getUsers();
+  const u = users[acc];
+  if(!u || u.pwd !== pwd){ toast("账号或密码错误（演示：13800138000 / 123456）"); return; }
+  setCurrentUser(u);
+  closeAuth();
+  toast("欢迎回来，" + u.name + " 👋");
+}
+function doRegister(){
+  const phone = document.getElementById("regPhone").value.trim();
+  const code = document.getElementById("regCode").value.trim();
+  const pwd = document.getElementById("regPass").value;
+  const pwd2 = document.getElementById("regPass2").value;
+  if(!/^1\d{10}$/.test(phone)){ toast("请输入正确的 11 位手机号"); return; }
+  if(!/^\d{6}$/.test(code)){ toast("请输入 6 位验证码（演示：123456）"); return; }
+  if(pwd.length < 6){ toast("密码至少 6 位"); return; }
+  if(pwd !== pwd2){ toast("两次输入的密码不一致"); return; }
+  if(!document.getElementById("regAgree").checked){ toast("请先同意用户协议"); return; }
+  const users = getUsers();
+  if(users[phone]){ toast("该手机号已注册，请直接登录"); return; }
+  const u = {phone: phone, name: "创作者" + phone.slice(-4), pwd: pwd, avatar: "创"};
+  users[phone] = u; saveUsers(users);
+  setCurrentUser(u); closeAuth();
+  toast("注册成功，已自动登录 🎉");
+}
+let codeTimer = null;
+function sendCode(){
+  const phone = document.getElementById("regPhone").value.trim();
+  if(!/^1\d{10}$/.test(phone)){ toast("请先输入正确的手机号"); return; }
+  toast("验证码已发送（演示验证码：123456）");
+  let n = 60;
+  const btn = document.getElementById("codeBtn");
+  btn.disabled = true;
+  codeTimer = setInterval(function(){
+    n--;
+    if(n <= 0){ clearInterval(codeTimer); btn.disabled = false; btn.textContent = "获取验证码"; }
+    else { btn.textContent = n + "s 后重发"; }
+  }, 1000);
+}
+function socialLogin(name){
+  const u = {phone: "第三方-" + name, name: name + "用户", avatar: name[0]};
+  setCurrentUser(u); closeAuth();
+  toast("已通过 " + name + " 登录");
+}
+function logout(){
+  setCurrentUser(null);
+  toast("已退出登录");
+}
+
 /* ================= 视图切换 ================= */
 function switchView(name){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
@@ -1500,6 +1695,7 @@ renderProjects();
 renderPipeline();
 initPreviewCards();
 resetPipeline();
+renderNavAuth();
 
 /* 滚动渐显 */
 const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.style.opacity="1";e.target.style.transform="none";io.unobserve(e.target)}})},{threshold:.08});
