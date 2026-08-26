@@ -1105,10 +1105,7 @@ const IMG_SCENE = "images/scenes/";
 const REEL_CHAR = { girl:"sunian", couple:"qunxiang", sword:"fanpai", boy:"wangye" };
 const GENRE_SCENE = { "古风仙侠":"city", "都市甜宠":"hall", "玄幻修真":"city", "系统逆袭":"garden", "悬疑惊悚":"bed", "穿越重生":"garden", "豪门商战":"hall", "热血少年":"city" };
 function sceneFile(name){ return (SCENES[name] && SCENES[name].file) || "hall"; }
-function imgFallback(el, kind, key){
-  if(kind === "char"){ const c = CHARACTERS[key] || CHARACTERS.sunian; el.outerHTML = charSVG(c.silo, c.accent); }
-  else { el.style.display = "none"; }
-}
+function imgFallback(el){ el.style.display = "none"; }
 function charImg(key){
   const c = CHARACTERS[key] || CHARACTERS.sunian;
   return `<img src="${IMG_CHAR}${key}.png" alt="${c.name}" onerror="imgFallback(this,'char','${key}')" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:72%;height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5))">`;
