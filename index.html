@@ -490,6 +490,40 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
 @media(max-width:1080px){.route-grid{grid-template-columns:repeat(3,1fr)}.pv-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){.route-grid{grid-template-columns:1fr}.pv-grid{grid-template-columns:1fr}}
 
+/* ============ 实时热点 · 造梗 ============ */
+.trend-board{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 22px;position:relative;overflow:hidden}
+.trend-board::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.trend-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.trend-meta{display:flex;align-items:center;gap:12px;font-size:13px;flex-wrap:wrap}
+.trend-countdown{font-family:var(--font-en);font-size:12.5px;color:var(--muted);background:var(--card-2);border:1px solid var(--border);padding:4px 12px;border-radius:99px}
+.trend-list{display:flex;flex-direction:column}
+.trend-item{display:flex;align-items:center;gap:14px;padding:13px 8px;border-bottom:1px solid var(--border);transition:.2s;border-radius:10px}
+.trend-item:last-child{border-bottom:none}
+.trend-item:hover{background:var(--card-2)}
+.trend-rank{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-family:var(--font-en);font-weight:800;font-size:14px;color:var(--muted);background:var(--card-2);border:1px solid var(--border);flex-shrink:0}
+.trend-rank.hot{color:#fff;background:linear-gradient(135deg,#fb923c,#ef4444);border-color:transparent;box-shadow:0 4px 14px -4px rgba(239,68,68,.7)}
+.trend-body{flex:1;min-width:0}
+.trend-title{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trend-sub{display:flex;align-items:center;gap:8px;margin-top:3px}
+.trend-src{font-size:11px;font-weight:700;padding:1px 8px;border-radius:6px}
+.trend-src.dy{background:rgba(254,44,85,.15);color:#ff8ba0;border:1px solid rgba(254,44,85,.4)}
+.trend-src.wb{background:rgba(251,191,36,.13);color:#fde68a;border:1px solid rgba(251,191,36,.4)}
+.trend-time{font-size:11.5px;color:var(--dim)}
+.trend-metrics{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.trend-heat{font-family:var(--font-en);font-size:13px;font-weight:700;color:#fca5a5}
+.trend-trend{font-family:var(--font-en);font-weight:800;font-size:13px}
+.trend-trend.up{color:var(--green)}
+.trend-trend.down{color:var(--red)}
+.trend-trend.flat{color:var(--dim)}
+.trend-go{flex-shrink:0}
+@media(max-width:640px){
+  .trend-board{padding:16px 14px}
+  .trend-item{flex-wrap:wrap;gap:10px}
+  .trend-title{font-size:14px}
+  .trend-metrics{margin-left:42px}
+  .trend-go{width:100%}
+}
+
 /* toast */
 #toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);z-index:300;background:rgba(18,18,31,.9);backdrop-filter:blur(12px);border:1px solid var(--border-2);color:var(--text);padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -663,6 +697,29 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
       <div class="stat"><div class="num">8600万+</div><div class="lab">累计生成漫剧</div></div>
       <div class="stat"><div class="num">32万</div><div class="lab">每日新作上线</div></div>
       <div class="stat"><div class="num">4.9分</div><div class="lab">创作者满意度</div></div>
+    </div>
+  </section>
+
+  <!-- ============ 实时热点 · 造梗灵感 ============ -->
+  <section class="section wrap">
+    <div class="sec-head">
+      <div class="tag">Realtime Trends</div>
+      <h2>🔥 实时热点 · 造梗灵感</h2>
+      <p>聚合抖音、微博最新热榜，每小时自动更新，只为你筛出近 3 小时最高热度话题。</p>
+    </div>
+    <div class="trend-board">
+      <div class="trend-toolbar">
+        <div class="g-tabs" id="trendTabs">
+          <button class="g-tab on" data-src="全部">全部</button>
+          <button class="g-tab" data-src="抖音">抖音</button>
+          <button class="g-tab" data-src="微博">微博</button>
+        </div>
+        <div class="trend-meta">
+          <span class="status-badge green">● 每小时自动更新</span>
+          <span class="trend-countdown" id="trendCountdown">下次更新 60:00</span>
+        </div>
+      </div>
+      <div class="trend-list" id="trendList"></div>
     </div>
   </section>
 
@@ -1999,6 +2056,61 @@ document.getElementById("gTabs").addEventListener("click",e=>{
   renderGallery(b.dataset.g);
 });
 
+/* ================= 实时热点（造梗） ================= */
+const TRENDS = [
+  {title:"重生之我在古代当首富", src:"抖音", heat:892, trend:"up", min:12},
+  {title:"爽文女主复仇记", src:"微博", heat:865, trend:"up", min:25},
+  {title:"霸总文学天花板", src:"抖音", heat:820, trend:"up", min:40},
+  {title:"AI漫剧爆款公式", src:"抖音", heat:780, trend:"up", min:8},
+  {title:"土味情话神反转", src:"抖音", heat:756, trend:"flat", min:55},
+  {title:"全网追的短剧结局", src:"微博", heat:730, trend:"down", min:70},
+  {title:"重生复仇题材新宠", src:"微博", heat:688, trend:"up", min:95},
+  {title:"赘婿逆袭名场面", src:"抖音", heat:640, trend:"up", min:120},
+  {title:"豪门千金隐藏身份", src:"抖音", heat:598, trend:"flat", min:140},
+  {title:"悬疑短剧反转王", src:"微博", heat:560, trend:"down", min:165},
+  {title:"古风权谋大女主", src:"微博", heat:520, trend:"up", min:175},
+  {title:"系统文改编漫剧", src:"抖音", heat:480, trend:"flat", min:150},
+];
+function renderTrends(src){
+  const list = TRENDS
+    .filter(t => t.min <= 180)
+    .filter(t => src === "全部" || t.src === src)
+    .sort((a,b) => b.heat - a.heat);
+  document.getElementById("trendList").innerHTML = list.slice(0, 8).map((t,i)=>`
+    <div class="trend-item">
+      <span class="trend-rank ${i<3?'hot':''}">${i+1}</span>
+      <div class="trend-body">
+        <div class="trend-title">${t.title}</div>
+        <div class="trend-sub"><span class="trend-src ${t.src==='抖音'?'dy':'wb'}">${t.src}</span><span class="trend-time">${t.min} 分钟前</span></div>
+      </div>
+      <div class="trend-metrics"><span class="trend-heat">🔥 ${t.heat}万</span><span class="trend-trend ${t.trend}">${t.trend==='up'?'▲':t.trend==='down'?'▼':'—'}</span></div>
+      <button class="mini-btn trend-go" onclick="useTrend('${t.title}')">⚡ 一键造梗</button>
+    </div>`).join("");
+}
+function useTrend(title){
+  switchView("studio");
+  setStage(0);
+  const ideaEl = document.getElementById("ideaInput");
+  if(ideaEl) ideaEl.value = "围绕热点「" + title + "」创作一部 9:16 竖屏短剧：强钩子、爽点密集、结尾反转";
+  toast("已导入热点「" + title + "」到创作台，可点击「AI 生成大纲」开始 🚀");
+}
+let trendCountdown = 3600;
+function trendTick(){
+  trendCountdown--;
+  if(trendCountdown <= 0) trendCountdown = 3600;
+  const el = document.getElementById("trendCountdown");
+  if(el){
+    const m = Math.floor(trendCountdown/60), s = trendCountdown % 60;
+    el.textContent = "下次更新 " + (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+  }
+}
+document.getElementById("trendTabs").addEventListener("click", e=>{
+  const b = e.target.closest(".g-tab"); if(!b) return;
+  document.querySelectorAll("#trendTabs .g-tab").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  renderTrends(b.dataset.src);
+});
+
 /* ================= 启动 ================= */
 function initPreviewCards(){
   const pc = [["重生之凤逆天下","sunian","city"],["甜宠隐婚","qunxiang","hall"],["仙帝归来","fanpai","city"],["王妃是神医","sunian","garden"]];
@@ -2014,6 +2126,8 @@ initPreviewCards();
 resetPipeline();
 renderNavAuth();
 renderModels();
+renderTrends("全部");
+setInterval(trendTick, 1000);
 
 /* 滚动渐显 */
 const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.style.opacity="1";e.target.style.transform="none";io.unobserve(e.target)}})},{threshold:.08});
