@@ -848,7 +848,14 @@ footer{border-top:1px solid var(--border);padding:60px 0 30px;margin-top:40px}
 
       <!-- 右侧：实时预览 -->
       <div class="preview-panel">
-        <div class="pv-canvas">
+        <div class="seg" id="ratioSeg">
+          <button class="on" data-r="9:16">9:16 竖屏</button>
+          <button data-r="16:9">16:9</button>
+          <button data-r="3:4">3:4</button>
+          <button data-r="21:9">21:9</button>
+          <button data-r="1:1">1:1</button>
+        </div>
+        <div class="pv-canvas" id="pvCanvas">
           <div class="inner" id="pvFrame"></div>
           <span class="pv-status status-badge gray" id="pvStatus">等待生成</span>
         </div>
@@ -1163,9 +1170,14 @@ const REEL_CHAR = { girl:"sunian", couple:"qunxiang", sword:"fanpai", boy:"wangy
 const GENRE_SCENE = { "古风仙侠":"city", "都市甜宠":"hall", "玄幻修真":"city", "系统逆袭":"garden", "悬疑惊悚":"bed", "穿越重生":"garden", "豪门商战":"hall", "热血少年":"city" };
 function sceneFile(name){ return (SCENES[name] && SCENES[name].file) || "hall"; }
 function imgFallback(el){ el.style.display = "none"; }
+let ASPECT_RATIO = "9:16";
+function charWidth(){
+  const map = {"9:16":"72%","3:4":"62%","1:1":"50%","16:9":"44%","21:9":"34%","4:3":"52%"};
+  return map[ASPECT_RATIO] || "72%";
+}
 function charImg(key){
   const c = CHARACTERS[key] || CHARACTERS.sunian;
-  return `<img src="${IMG_CHAR}${key}.png" alt="${c.name}" onerror="imgFallback(this,'char','${key}')" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:72%;height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5))">`;
+  return `<img src="${IMG_CHAR}${key}.png" alt="${c.name}" onerror="imgFallback(this,'char','${key}')" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:${charWidth()};height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5))">`;
 }
 function sceneImg(file){
   return `<img src="${IMG_SCENE}${file}.png" alt="场景" onerror="imgFallback(this,'scene')" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
@@ -2109,6 +2121,21 @@ document.getElementById("trendTabs").addEventListener("click", e=>{
   document.querySelectorAll("#trendTabs .g-tab").forEach(x=>x.classList.remove("on"));
   b.classList.add("on");
   renderTrends(b.dataset.src);
+});
+
+/* ================= 画幅比例（可配置） ================= */
+function setAspect(r){
+  ASPECT_RATIO = r;
+  const cv = document.getElementById("pvCanvas");
+  if(cv) cv.style.aspectRatio = r.replace(":", " / ");
+  if(typeof pvTotal !== "undefined" && pvTotal > 0){ selectShot(pvIndex); }
+  toast("画幅已切换为 " + r);
+}
+document.getElementById("ratioSeg").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#ratioSeg button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  setAspect(b.dataset.r);
 });
 
 /* ================= 启动 ================= */
