@@ -1177,10 +1177,10 @@ function charWidth(){
 }
 function charImg(key){
   const c = CHARACTERS[key] || CHARACTERS.sunian;
-  return `<img src="${IMG_CHAR}${key}.png" alt="${c.name}" onerror="imgFallback(this,'char','${key}')" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:${charWidth()};height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5))">`;
+  return `<img src="${IMG_CHAR}${key}.jpg" alt="${c.name}" onerror="imgFallback(this,'char','${key}')" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:${charWidth()};height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5))">`;
 }
 function sceneImg(file){
-  return `<img src="${IMG_SCENE}${file}.png" alt="场景" onerror="imgFallback(this,'scene')" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
+  return `<img src="${IMG_SCENE}${file}.jpg" alt="场景" onerror="imgFallback(this,'scene')" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
 }
 
 const EMOTIONS = {震惊:"#f87171",傲慢:"#fbbf24",冷笑:"#22d3ee",决绝:"#fb923c",冷静:"#60a5fa",坚定:"#f472b6",深沉:"#818cf8",微笑:"#fb7185",定格:"#a78bfa"};
@@ -1321,7 +1321,7 @@ function renderGallery(filter){
 function renderStyles(){
   document.getElementById("styleList").innerHTML = STYLES.map(s=>`
     <div class="style-card" onclick="switchView('studio')">
-      <div class="sc-bg" style="background:${s.g}"><img src="images/styles/${s.img}.png" alt="${s.n}" onerror="this.style.display='none'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+      <div class="sc-bg" style="background:${s.g}"><img src="images/styles/${s.img}.jpg" alt="${s.n}" onerror="this.style.display='none'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
       <div class="sc-veil"></div><span class="sc-en">${s.en}</span><span class="sc-name">${s.n}</span>
     </div>`).join("");
 }
